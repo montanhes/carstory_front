@@ -1,8 +1,14 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import VehicleFormModal from '../components/VehicleFormModal'
+import ConfirmDialog from '../components/ConfirmDialog'
+import AlertDialog from '../components/AlertDialog'
 import { vehicleService, enumService, type Vehicle, type EnumOption } from '../services/api'
 
+type AlertType = 'error' | 'success' | 'info' | 'warning'
+
 export default function Vehicles() {
+  const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [bodyTypes, setBodyTypes] = useState<EnumOption[]>([])
@@ -10,6 +16,31 @@ export default function Vehicles() {
   const [transmissionTypes, setTransmissionTypes] = useState<EnumOption[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Dialog states
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    onConfirm: () => void
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  })
+
+  const [alertDialog, setAlertDialog] = useState<{
+    isOpen: boolean
+    type: AlertType
+    title: string
+    message: string
+  }>({
+    isOpen: false,
+    type: 'info',
+    title: '',
+    message: '',
+  })
 
   useEffect(() => {
     const loadData = async () => {
@@ -43,20 +74,35 @@ export default function Vehicles() {
       setIsModalOpen(false)
     } catch (err) {
       console.error('Erro ao criar veículo:', err)
-      alert('Erro ao criar veículo. Tente novamente.')
+      setAlertDialog({
+        isOpen: true,
+        type: 'error',
+        title: 'Erro',
+        message: 'Erro ao criar veículo. Tente novamente.',
+      })
     }
   }
 
-  const handleDeleteVehicle = async (id: number) => {
-    if (!confirm('Tem certeza que deseja excluir este veículo?')) return
-    
-    try {
-      await vehicleService.deleteVehicle(id)
-      setVehicles(vehicles.filter(v => v.id !== id))
-    } catch (err) {
-      console.error('Erro ao excluir veículo:', err)
-      alert('Erro ao excluir veículo. Tente novamente.')
-    }
+  const handleDeleteVehicle = (id: number) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Excluir Veículo',
+      message: 'Tem certeza que deseja excluir este veículo? Esta ação não pode ser desfeita.',
+      onConfirm: async () => {
+        try {
+          await vehicleService.deleteVehicle(id)
+          setVehicles(vehicles.filter(v => v.id !== id))
+        } catch (err) {
+          console.error('Erro ao excluir veículo:', err)
+          setAlertDialog({
+            isOpen: true,
+            type: 'error',
+            title: 'Erro',
+            message: 'Erro ao excluir veículo. Tente novamente.',
+          })
+        }
+      },
+    })
   }
 
   if (loading) {
@@ -77,27 +123,13 @@ export default function Vehicles() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-base-content">Veículos</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold text-base-content">Veículos</h2>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="btn btn-primary"
+          className="btn btn-primary btn-sm sm:btn-md w-full sm:w-auto"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          Adicionar Veículo
+          <span className="sm:inline">Adicionar Veículo</span>
         </button>
       </div>
 
@@ -106,7 +138,7 @@ export default function Vehicles() {
           <div className="text-base-content/30 mb-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-16 w-16 mx-auto"
+              className="h-12 sm:h-16 w-12 sm:w-16 mx-auto"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -119,69 +151,72 @@ export default function Vehicles() {
               />
             </svg>
           </div>
-          <p className="text-base-content/60 text-lg">Nenhum veículo cadastrado</p>
+          <p className="text-base-content/60 text-base sm:text-lg">Nenhum veículo cadastrado</p>
           <p className="text-base-content/40 text-sm mt-2">
             Clique no botão acima para adicionar seu primeiro veículo
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {vehicles.map((vehicle) => (
             <div key={vehicle.id} className="card bg-base-200 shadow-md hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-primary/50 group">
-              <div className="card-body p-5">
+              <div className="card-body p-4 sm:p-5">
                 {/* Header */}
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-base-content leading-tight">
+                <div className="flex justify-between items-start gap-3 mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base sm:text-lg font-bold text-base-content leading-tight break-words">
                       {vehicle.name}
                     </h3>
-                    <p className="text-sm text-base-content/60 mt-0.5">
+                    <p className="text-xs sm:text-sm text-base-content/60 mt-0.5 truncate">
                       {vehicle.make} {vehicle.model}
                     </p>
                   </div>
-                  <div className="badge badge-primary badge-sm">
+                  <div className="badge badge-primary badge-xs sm:badge-sm whitespace-nowrap">
                     {vehicle.manufacturing_year}/{vehicle.model_year}
                   </div>
                 </div>
 
                 {/* Info Grid */}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mb-4">
+                <div className="grid grid-cols-2 gap-x-2 gap-y-2 text-xs sm:text-sm mb-4">
                   {vehicle.license_plate && (
-                    <div>
+                    <div className="truncate">
                       <span className="text-base-content/50">Placa:</span>
-                      <span className="text-base-content ml-1 font-medium">{vehicle.license_plate}</span>
+                      <span className="text-base-content ml-1 font-medium block truncate">{vehicle.license_plate}</span>
                     </div>
                   )}
-                  <div>
+                  <div className="truncate">
                     <span className="text-base-content/50">Cor:</span>
-                    <span className="text-base-content ml-1">{vehicle.color}</span>
+                    <span className="text-base-content ml-1 block truncate">{vehicle.color}</span>
                   </div>
                   {vehicle.fuel_label && (
-                    <div>
+                    <div className="truncate">
                       <span className="text-base-content/50">Combustível:</span>
-                      <span className="text-base-content ml-1">{vehicle.fuel_label}</span>
+                      <span className="text-base-content ml-1 block truncate">{vehicle.fuel_label}</span>
                     </div>
                   )}
                   {vehicle.transmission_label && (
-                    <div>
+                    <div className="truncate">
                       <span className="text-base-content/50">Câmbio:</span>
-                      <span className="text-base-content ml-1">{vehicle.transmission_label}</span>
+                      <span className="text-base-content ml-1 block truncate">{vehicle.transmission_label}</span>
                     </div>
                   )}
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between pt-3 border-t border-base-300">
-                  <div className="text-sm">
+                <div className="flex flex-col gap-3 pt-3 border-t border-base-300">
+                  <div className="text-xs sm:text-sm">
                     <span className="text-base-content/50">KM:</span>
                     <span className="text-base-content ml-1 font-medium">{vehicle.formatted_initial_mileage}</span>
                   </div>
                   <div className="flex gap-2">
-                    <button className="btn btn-xs btn-outline btn-primary">
-                      Editar
+                    <button
+                      className="btn btn-xs flex-1 btn-outline btn-primary"
+                      onClick={() => navigate(`/dashboard/vehicles/${vehicle.id}`)}
+                    >
+                      Detalhes
                     </button>
-                    <button 
-                      className="btn btn-xs btn-outline btn-error"
+                    <button
+                      className="btn btn-xs flex-1 btn-outline btn-error"
                       onClick={() => handleDeleteVehicle(vehicle.id)}
                     >
                       Excluir
@@ -201,6 +236,25 @@ export default function Vehicles() {
         bodyTypes={bodyTypes}
         fuelTypes={fuelTypes}
         transmissionTypes={transmissionTypes}
+      />
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        isDangerous
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+      />
+
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        type={alertDialog.type}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        onClose={() => setAlertDialog({ ...alertDialog, isOpen: false })}
       />
     </div>
   )

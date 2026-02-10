@@ -27,62 +27,65 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-800 mb-2">CarStory</h1>
-          <p className="text-slate-600 text-lg">Acesse sua conta</p>
+    <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
+      <div className="w-full max-w-sm md:max-w-md">
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="text-3xl sm:text-4xl md:text-4xl font-bold text-base-content mb-2">CarStory</h1>
+          <p className="text-base-content/70 text-sm md:text-base">Acesse sua conta</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 block">E-mail</label>
+        <form onSubmit={handleSubmit} className="card bg-base-100 shadow-xl p-4 sm:p-6 md:p-8 space-y-4 md:space-y-6">
+          <div className="form-control">
+            <label className="label py-1">
+              <span className="label-text text-xs md:text-sm">E-mail</span>
+            </label>
             <input
               type="email"
               placeholder="seu@email.com"
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all duration-200"
+              className="input input-bordered input-sm md:input-md w-full"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 block">Senha</label>
+          <div className="form-control">
+            <label className="label py-1">
+              <span className="label-text text-xs md:text-sm">Senha</span>
+            </label>
             <input
               type="password"
               placeholder="••••••••"
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all duration-200"
+              className="input input-bordered input-sm md:input-md w-full"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="remember"
-              className="w-4 h-4 rounded border-slate-300 text-slate-600 focus:ring-slate-400 cursor-pointer"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-            />
-            <label htmlFor="remember" className="ml-2 text-sm text-slate-600 cursor-pointer">
-              Lembrar de mim
+          <div className="form-control">
+            <label className="label cursor-pointer justify-start gap-2 py-1">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-xs md:checkbox-sm"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+              />
+              <span className="label-text text-xs md:text-sm">Lembrar de mim</span>
             </label>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn btn-primary btn-sm md:btn-md w-full mt-2"
           >
-            {loading ? 'Entrando...' : 'Entrar'}
+            {loading ? <span className="loading loading-spinner loading-xs md:loading-sm"></span> : 'Entrar'}
           </button>
         </form>
 
         <div className="text-center mt-6">
-          <Link to="/" className="text-slate-600 hover:text-slate-800 transition-colors duration-200">
+          <Link to="/" className="link link-hover text-base-content/70 text-xs md:text-sm">
             Voltar para a página inicial
           </Link>
         </div>

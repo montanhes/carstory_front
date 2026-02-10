@@ -33,7 +33,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const login = async (email: string, password: string, remember: boolean = false) => {
-    await authService.login(email, password, remember)
+    const response = await authService.login(email, password, remember)
+    // Salvar token retornado pela API
+    if (response.token) {
+      localStorage.setItem('token', response.token)
+    }
     await checkAuth()
   }
 

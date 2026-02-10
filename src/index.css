@@ -5,5 +5,5 @@
 @tailwind utilities;
 
 @plugin "daisyui" {
-  themes: abyss --default;
+  themes: abyss --default, emerald, cupcake, garden, forest, fantasy, black, luxury, dracula, autumn, lemonade, coffee, dim, nord
 }
