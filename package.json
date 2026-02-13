@@ -10,8 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@number-flow/react": "^0.5.11",
     "axios": "^1.13.4",
+    "canvas-confetti": "^1.9.4",
     "date-fns": "^4.1.0",
+    "framer-motion": "^12.34.0",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",
     "react-day-picker": "^9.13.2",
@@ -21,6 +24,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@tailwindcss/postcss": "^4.1.18",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
