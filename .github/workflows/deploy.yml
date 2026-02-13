@@ -31,20 +31,19 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.HOSTOO_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Ensure public_html exists
+      - name: Upload build to temporary folder
         run: |
           ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} \
-          "mkdir -p /home/${{ secrets.HOSTOO_USER }}/public_html"
+          "mkdir -p /home/${{ secrets.HOSTOO_USER }}/frontend_tmp"
 
-      - name: Clean old frontend files (keep carstory_api)
-        run: |
-          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "\
-          find /home/${{ secrets.HOSTOO_USER }}/public_html \
-          -mindepth 1 \
-          ! -name 'carstory_api' \
-          -exec rm -rf {} +"
-
-      - name: Deploy frontend via SCP
-        run: |
           scp -r dist/* \
-          ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:/home/${{ secrets.HOSTOO_USER }}/public_html/
+          ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:/home/${{ secrets.HOSTOO_USER }}/frontend_tmp/
+
+      - name: Replace frontend safely
+        run: |
+          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "
+            cd /home/${{ secrets.HOSTOO_USER }}/public_html && \
+            rm -rf index.html assets vite.svg 2>/dev/null || true && \
+            mv /home/${{ secrets.HOSTOO_USER }}/frontend_tmp/* . && \
+            rm -rf /home/${{ secrets.HOSTOO_USER }}/frontend_tmp
+          "
