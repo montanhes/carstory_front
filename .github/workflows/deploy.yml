@@ -31,14 +31,20 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.HOSTOO_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Create target directory if not exists
+      - name: Ensure public_html exists
         run: |
-          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "mkdir -p /home/${{ secrets.HOSTOO_USER }}/public_html"
+          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} \
+          "mkdir -p /home/${{ secrets.HOSTOO_USER }}/public_html"
 
-      - name: Clean old files
+      - name: Clean old frontend files (keep carstory_api)
         run: |
-          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "rm -rf /home/${{ secrets.HOSTOO_USER }}/public_html/*"
+          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "\
+          find /home/${{ secrets.HOSTOO_USER }}/public_html \
+          -mindepth 1 \
+          ! -name 'carstory_api' \
+          -exec rm -rf {} +"
 
-      - name: Deploy via SCP
+      - name: Deploy frontend via SCP
         run: |
-          scp -r dist/* ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:/home/${{ secrets.HOSTOO_USER }}/public_html/
+          scp -r dist/* \
+          ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:/home/${{ secrets.HOSTOO_USER }}/public_html/
