@@ -33,12 +33,12 @@ jobs:
 
       - name: Create target directory if not exists
         run: |
-          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "mkdir -p /home/${{ secrets.HOSTOO_USER }}/public_html/carstory_front"
+          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "mkdir -p /home/${{ secrets.HOSTOO_USER }}/public_html"
 
       - name: Clean old files
         run: |
-          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "rm -rf /home/${{ secrets.HOSTOO_USER }}/public_html/carstory_front/*"
+          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "rm -rf /home/${{ secrets.HOSTOO_USER }}/public_html/*"
 
       - name: Deploy via SCP
         run: |
-          scp -r dist/* ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:/home/${{ secrets.HOSTOO_USER }}/public_html/carstory_front/
+          scp -r dist/* ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:/home/${{ secrets.HOSTOO_USER }}/public_html/
