@@ -1,0 +1,44 @@
+name: Deploy Vite App to Hostoo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HOSTOO_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.HOSTOO_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create target directory if not exists
+        run: |
+          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "mkdir -p /home/${{ secrets.HOSTOO_USER }}/public_html/carstory_front"
+
+      - name: Clean old files
+        run: |
+          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "rm -rf /home/${{ secrets.HOSTOO_USER }}/public_html/carstory_front/*"
+
+      - name: Deploy via SCP
+        run: |
+          scp -r dist/* ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:/home/${{ secrets.HOSTOO_USER }}/public_html/carstory_front/

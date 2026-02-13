@@ -58,7 +58,7 @@ export default function AlertDialog({
       onClose={handleClose}
     >
       <div className="modal-box bg-base-200 border border-base-300 p-0 overflow-hidden">
-        <div className={getAlertClass()}>
+        <div className={getAlertClass(type)}>
           <div>
             <h3 className="font-bold">{title}</h3>
             <div className="text-sm">{message}</div>

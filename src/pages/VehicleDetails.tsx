@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { vehicleService, expenseService, enumService, type Vehicle, type VehicleExpense, type EnumOption, type ExpenseCategoryWithTypes, type ExpenseFilters } from '../services/api'
+import { vehicleService, expenseService, enumService, type Vehicle, type VehicleExpense, type EnumOption, type ExpenseCategoryWithTypes, type ExpenseFilters as ExpenseFiltersType } from '../services/api'
 import ExpenseFormModal from '../components/ExpenseFormModal'
 import ExpenseFilters from '../components/ExpenseFilters'
 import ConfirmDialog from '../components/ConfirmDialog'
@@ -21,7 +21,7 @@ export default function VehicleDetails() {
   const [paymentMethods, setPaymentMethods] = useState<EnumOption[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [filters, setFilters] = useState<ExpenseFilters>({
+  const [filters, setFilters] = useState<ExpenseFiltersType>({
     sort_by: 'expense_date',
     sort_direction: 'desc',
   })
@@ -522,7 +522,7 @@ export default function VehicleDetails() {
       <ExpenseFilters
         isOpen={isFiltersOpen}
         onClose={() => setIsFiltersOpen(false)}
-        onApply={(newFilters) => setFilters(newFilters)}
+        onApply={(newFilters: ExpenseFiltersType) => setFilters(newFilters)}
         currentFilters={filters}
         expenseCategoriesWithTypes={expenseCategoriesWithTypes}
         paymentMethods={paymentMethods}
