@@ -281,4 +281,396 @@ export const expenseService = {
   },
 }
 
+// Interfaces de Relatórios
+export interface DashboardReport {
+  total_expenses: number;
+  average_per_vehicle: number;
+  period_comparison: {
+    current: number;
+    previous: number;
+    variation_percent: number;
+  };
+  expenses_over_time: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+    }>;
+  };
+  vehicles_count: number;
+  expenses_count: number;
+}
+
+export interface ExpensesByCategory {
+  total: number;
+  by_category: Array<{
+    category: string;
+    category_id: number;
+    total: number;
+    percentage: number;
+    count: number;
+  }>;
+  chart_data: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+    }>;
+  };
+}
+
+export interface ExpensesByVehicle {
+  total: number;
+  vehicles: Array<{
+    vehicle_id: number;
+    vehicle_name: string;
+    total_expenses: number;
+    expenses_count: number;
+    average_expense: number;
+    last_expense_date: string;
+  }>;
+  chart_data: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+    }>;
+  };
+}
+
+export interface ExpensesExtract {
+  data: Array<{
+    id: number;
+    vehicle_name: string;
+    expense_category_label: string;
+    expense_type_label: string;
+    value: number;
+    formatted_value: string;
+    payment_method_label: string;
+    expense_date: string;
+    odometer_mileage: number | null;
+    notes: string | null;
+  }>;
+  pagination: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+  summary: {
+    total_value: number;
+    count: number;
+  };
+}
+
+export interface ReportFilters {
+  period?: 'monthly' | 'yearly' | 'all';
+  start_date?: string;
+  end_date?: string;
+  vehicle_id?: number;
+  category?: number;
+  expense_type?: number;
+  payment_method?: number;
+  per_page?: number;
+  page?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+  group_by?: 'day' | 'week' | 'month' | 'quarter' | 'year';
+  vehicle_ids?: number[];
+}
+
+// Fase 2 - Interfaces
+export interface TemporalAnalysis {
+  period: string;
+  data: Array<{
+    period: string;
+    period_label: string;
+    total: number;
+    count: number;
+    average: number;
+  }>;
+  chart_data: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+    }>;
+  };
+  trends: {
+    average_monthly: number;
+    highest_month: {
+      period: string;
+      period_label: string;
+      value: number;
+    };
+    lowest_month: {
+      period: string;
+      period_label: string;
+      value: number;
+    };
+  };
+}
+
+export interface FuelAnalysis {
+  total_fuel_expenses: number;
+  by_vehicle: Array<{
+    vehicle_id: number;
+    vehicle_name: string;
+    fuel_type: string;
+    total_spent: number;
+    count: number;
+    average_per_fill: number;
+  }>;
+  by_fuel_type: Array<{
+    fuel_type: string;
+    total: number;
+    count: number;
+    average: number;
+  }>;
+  chart_data: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+    }>;
+  };
+}
+
+export interface VehicleComparison {
+  vehicles: Array<{
+    vehicle_id: number;
+    name: string;
+    fuel_type: string;
+    total_expenses: number;
+    fuel_expenses: number;
+    maintenance_expenses: number;
+    average_expense: number;
+    expenses_count: number;
+  }>;
+  comparison_chart: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+    }>;
+  };
+  most_economical: {
+    vehicle_id: number;
+    name: string;
+    total_expenses: number;
+  };
+}
+
+export interface MaintenanceReport {
+  total_maintenance: number;
+  by_vehicle: Array<{
+    vehicle_id: number;
+    vehicle_name: string;
+    total: number;
+    count: number;
+    last_maintenance: string;
+  }>;
+  by_type: Array<{
+    type: string;
+    count: number;
+    total: number;
+    average: number;
+  }>;
+  chart_data: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+    }>;
+  };
+}
+
+// Fase 3 - Interfaces
+export interface DepreciationReport {
+  vehicles: Array<{
+    vehicle_id: number;
+    name: string;
+    acquisition_date: string;
+    acquisition_price: number;
+    total_expenses: number;
+    total_investment: number;
+    months_owned: number;
+  }>;
+  chart_data: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+    }>;
+  };
+}
+
+export interface FleetBenchmark {
+  fleet_size: number;
+  total_expenses: number;
+  average_per_vehicle: number;
+  most_economical: {
+    vehicle_id: number;
+    name: string;
+    total: number;
+  };
+  most_expensive: {
+    vehicle_id: number;
+    name: string;
+    total: number;
+  };
+  distribution: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+    }>;
+  };
+  by_category: Array<{
+    category: string;
+    total: number;
+    average_per_vehicle: number;
+  }>;
+}
+
+export interface AlertsReport {
+  alerts: Array<{
+    type: string;
+    priority: 'high' | 'medium' | 'low';
+    vehicle_id: number;
+    vehicle_name: string;
+    message: string;
+    date: string;
+  }>;
+}
+
+export interface BudgetReport {
+  message: string;
+  note: string;
+}
+
+// Report Service
+export const reportService = {
+  async getDashboard(filters?: ReportFilters): Promise<DashboardReport> {
+    const params = new URLSearchParams();
+    if (filters?.period) params.append('period', filters.period);
+    if (filters?.start_date) params.append('start_date', filters.start_date);
+    if (filters?.end_date) params.append('end_date', filters.end_date);
+    if (filters?.vehicle_id) params.append('vehicle_id', filters.vehicle_id.toString());
+
+    const query = params.toString();
+    const response = await api.get(`/api/reports/dashboard${query ? `?${query}` : ''}`);
+    return response.data;
+  },
+
+  async getExpensesByCategory(filters?: ReportFilters): Promise<ExpensesByCategory> {
+    const params = new URLSearchParams();
+    if (filters?.start_date) params.append('start_date', filters.start_date);
+    if (filters?.end_date) params.append('end_date', filters.end_date);
+    if (filters?.vehicle_id) params.append('vehicle_id', filters.vehicle_id.toString());
+
+    const query = params.toString();
+    const response = await api.get(`/api/reports/expenses/by-category${query ? `?${query}` : ''}`);
+    return response.data;
+  },
+
+  async getExpensesByVehicle(filters?: ReportFilters): Promise<ExpensesByVehicle> {
+    const params = new URLSearchParams();
+    if (filters?.start_date) params.append('start_date', filters.start_date);
+    if (filters?.end_date) params.append('end_date', filters.end_date);
+    if (filters?.sort_by) params.append('sort_by', filters.sort_by);
+
+    const query = params.toString();
+    const response = await api.get(`/api/reports/expenses/by-vehicle${query ? `?${query}` : ''}`);
+    return response.data;
+  },
+
+  async getExpensesExtract(filters?: ReportFilters): Promise<ExpensesExtract> {
+    const params = new URLSearchParams();
+    if (filters?.start_date) params.append('start_date', filters.start_date);
+    if (filters?.end_date) params.append('end_date', filters.end_date);
+    if (filters?.vehicle_id) params.append('vehicle_id', filters.vehicle_id.toString());
+    if (filters?.category) params.append('category', filters.category.toString());
+    if (filters?.expense_type) params.append('expense_type', filters.expense_type.toString());
+    if (filters?.payment_method) params.append('payment_method', filters.payment_method.toString());
+    if (filters?.per_page) params.append('per_page', filters.per_page.toString());
+    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.sort_by) params.append('sort_by', filters.sort_by);
+    if (filters?.sort_order) params.append('sort_order', filters.sort_order);
+
+    const query = params.toString();
+    const response = await api.get(`/api/reports/expenses/extract${query ? `?${query}` : ''}`);
+    return response.data;
+  },
+
+  // Fase 2 - Métodos
+  async getTemporalAnalysis(filters?: ReportFilters): Promise<TemporalAnalysis> {
+    const params = new URLSearchParams();
+    if (filters?.group_by) params.append('group_by', filters.group_by);
+    if (filters?.start_date) params.append('start_date', filters.start_date);
+    if (filters?.end_date) params.append('end_date', filters.end_date);
+    if (filters?.vehicle_id) params.append('vehicle_id', filters.vehicle_id.toString());
+
+    const query = params.toString();
+    const response = await api.get(`/api/reports/temporal-analysis${query ? `?${query}` : ''}`);
+    return response.data;
+  },
+
+  async getFuelAnalysis(filters?: ReportFilters): Promise<FuelAnalysis> {
+    const params = new URLSearchParams();
+    if (filters?.start_date) params.append('start_date', filters.start_date);
+    if (filters?.end_date) params.append('end_date', filters.end_date);
+    if (filters?.vehicle_id) params.append('vehicle_id', filters.vehicle_id.toString());
+
+    const query = params.toString();
+    const response = await api.get(`/api/reports/fuel-analysis${query ? `?${query}` : ''}`);
+    return response.data;
+  },
+
+  async getVehicleComparison(filters?: ReportFilters): Promise<VehicleComparison> {
+    const params = new URLSearchParams();
+    if (filters?.start_date) params.append('start_date', filters.start_date);
+    if (filters?.end_date) params.append('end_date', filters.end_date);
+    if (filters?.vehicle_ids) {
+      filters.vehicle_ids.forEach(id => params.append('vehicle_ids[]', id.toString()));
+    }
+
+    const query = params.toString();
+    const response = await api.get(`/api/reports/vehicle-comparison${query ? `?${query}` : ''}`);
+    return response.data;
+  },
+
+  async getMaintenanceReport(filters?: ReportFilters): Promise<MaintenanceReport> {
+    const params = new URLSearchParams();
+    if (filters?.start_date) params.append('start_date', filters.start_date);
+    if (filters?.end_date) params.append('end_date', filters.end_date);
+    if (filters?.vehicle_id) params.append('vehicle_id', filters.vehicle_id.toString());
+
+    const query = params.toString();
+    const response = await api.get(`/api/reports/maintenance${query ? `?${query}` : ''}`);
+    return response.data;
+  },
+
+  // Fase 3 - Métodos
+  async getDepreciationReport(): Promise<DepreciationReport> {
+    const response = await api.get('/api/reports/depreciation');
+    return response.data;
+  },
+
+  async getFleetBenchmark(): Promise<FleetBenchmark> {
+    const response = await api.get('/api/reports/fleet-benchmark');
+    return response.data;
+  },
+
+  async getAlertsReport(): Promise<AlertsReport> {
+    const response = await api.get('/api/reports/alerts');
+    return response.data;
+  },
+
+  async getBudgetReport(): Promise<BudgetReport> {
+    const response = await api.get('/api/reports/budget');
+    return response.data;
+  }
+};
+
 export default api

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
+import { FileText } from 'lucide-react'
 
 export default function DashboardLayout() {
   const navigate = useNavigate()
@@ -19,6 +20,26 @@ export default function DashboardLayout() {
     { to: 'vehicles', label: 'Veículos', end: false },
     { to: 'profile', label: 'Perfil', end: false },
   ]
+
+  const reportSections = {
+    essentials: [
+      { to: 'reports/by-category', label: 'Por Categoria' },
+      { to: 'reports/by-vehicle', label: 'Por Veículo' },
+      { to: 'reports/extract', label: 'Extrato Detalhado' },
+    ],
+    analysis: [
+      { to: 'reports/temporal-analysis', label: 'Análise Temporal' },
+      { to: 'reports/fuel-analysis', label: 'Análise de Combustível' },
+      { to: 'reports/vehicle-comparison', label: 'Comparação de Veículos' },
+      { to: 'reports/maintenance', label: 'Manutenção' },
+    ],
+    advanced: [
+      { to: 'reports/depreciation', label: 'Depreciação' },
+      { to: 'reports/fleet-benchmark', label: 'Benchmark de Frota' },
+      { to: 'reports/alerts', label: 'Alertas e Lembretes' },
+      { to: 'reports/budget', label: 'Orçamento' },
+    ],
+  }
 
   const NavLink_ = ({ to, label, end }: any) => (
     <li>
@@ -92,6 +113,92 @@ export default function DashboardLayout() {
             {navItems.map((item) => (
               <NavLink_ key={item.to} {...item} />
             ))}
+
+            {/* Menu de Relatórios */}
+            <li>
+              <details className="group" open>
+                <summary className="flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 text-base-content/70 hover:bg-base-300 hover:text-base-content cursor-pointer list-none">
+                  <FileText size={18} />
+                  <span>Relatórios</span>
+                  <svg className="ml-auto h-4 w-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <ul className="mt-1 ml-6 space-y-2">
+                  {/* Essenciais */}
+                  <li>
+                    <div className="text-xs font-semibold text-base-content/50 px-4 py-1">ESSENCIAIS</div>
+                    <ul className="space-y-1">
+                      {reportSections.essentials.map((item) => (
+                        <li key={item.to}>
+                          <NavLink
+                            to={item.to}
+                            onClick={() => setDrawerOpen(false)}
+                            className={({ isActive }) =>
+                              `block px-4 py-2 rounded-lg text-sm transition-all duration-200 ${
+                                isActive
+                                  ? 'bg-primary text-primary-content font-medium'
+                                  : 'text-base-content/70 hover:bg-base-300 hover:text-base-content'
+                              }`
+                            }
+                          >
+                            {item.label}
+                          </NavLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+
+                  {/* Análise */}
+                  <li>
+                    <div className="text-xs font-semibold text-base-content/50 px-4 py-1 mt-2">ANÁLISE</div>
+                    <ul className="space-y-1">
+                      {reportSections.analysis.map((item) => (
+                        <li key={item.to}>
+                          <NavLink
+                            to={item.to}
+                            onClick={() => setDrawerOpen(false)}
+                            className={({ isActive }) =>
+                              `block px-4 py-2 rounded-lg text-sm transition-all duration-200 ${
+                                isActive
+                                  ? 'bg-primary text-primary-content font-medium'
+                                  : 'text-base-content/70 hover:bg-base-300 hover:text-base-content'
+                              }`
+                            }
+                          >
+                            {item.label}
+                          </NavLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+
+                  {/* Avançados */}
+                  <li>
+                    <div className="text-xs font-semibold text-base-content/50 px-4 py-1 mt-2">AVANÇADOS</div>
+                    <ul className="space-y-1">
+                      {reportSections.advanced.map((item) => (
+                        <li key={item.to}>
+                          <NavLink
+                            to={item.to}
+                            onClick={() => setDrawerOpen(false)}
+                            className={({ isActive }) =>
+                              `block px-4 py-2 rounded-lg text-sm transition-all duration-200 ${
+                                isActive
+                                  ? 'bg-primary text-primary-content font-medium'
+                                  : 'text-base-content/70 hover:bg-base-300 hover:text-base-content'
+                              }`
+                            }
+                          >
+                            {item.label}
+                          </NavLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                </ul>
+              </details>
+            </li>
           </ul>
 
           {/* Divider */}
