@@ -61,54 +61,51 @@ export default function DashboardLayout() {
   )
 
   return (
-    <div className="drawer lg:drawer-open">
-      <input
-        id="sidebar-drawer"
-        type="checkbox"
-        className="drawer-toggle hidden"
-        checked={drawerOpen}
-        onChange={(e) => setDrawerOpen(e.target.checked)}
-      />
-
-      {/* Main Content */}
-      <div className="drawer-content flex flex-col h-screen bg-base-100">
-        {/* Header */}
-        <header className="h-16 bg-base-200 border-b border-base-300 flex items-center px-4 md:px-6 shadow-sm z-30">
-          <label
-            htmlFor="sidebar-drawer"
-            className="btn btn-ghost btn-circle drawer-button lg:hidden"
+    <div className="flex flex-col h-screen">
+      {/* Header — largura total */}
+      <header className="h-16 flex-shrink-0 bg-base-200 border-b border-base-300 flex items-center px-4 md:px-6 shadow-sm z-50 relative">
+        <button
+          onClick={() => setDrawerOpen(!drawerOpen)}
+          className="btn btn-ghost btn-circle lg:hidden"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            className="inline-block h-5 w-5 stroke-current"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              className="inline-block h-5 w-5 stroke-current"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              ></path>
-            </svg>
-          </label>
-          <span className="text-xl font-bold text-base-content ml-2 lg:ml-0">CarStory</span>
-        </header>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+        <span className="text-xl font-bold text-base-content ml-2 lg:ml-0">CarStory</span>
+      </header>
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-base-100">
-          <Outlet />
-        </main>
-      </div>
+      {/* Área abaixo do header: sidebar + conteúdo */}
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Overlay mobile */}
+        {drawerOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+            style={{ top: '4rem' }}
+            onClick={() => setDrawerOpen(false)}
+          />
+        )}
 
-      {/* Sidebar Drawer */}
-      <div className="drawer-side z-50">
-        <label
-          htmlFor="sidebar-drawer"
-          aria-label="close sidebar"
-          className="drawer-overlay"
-        ></label>
-        <aside className="bg-base-200 border-r border-base-300 p-4 overflow-y-auto w-64 min-h-full flex flex-col">
+        {/* Sidebar */}
+        <aside
+          className={`
+            w-64 flex-shrink-0 bg-base-200 border-r border-base-300 flex flex-col overflow-y-auto
+            fixed top-16 bottom-0 left-0 z-40 transition-transform duration-300
+            lg:static lg:top-auto lg:bottom-auto lg:translate-x-0
+            ${drawerOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          `}
+        >
+          <div className="p-4 flex flex-col flex-1">
           <ul className="space-y-1 flex-1">
             {navItems.map((item) => (
               <NavLink_ key={item.to} {...item} />
@@ -229,7 +226,13 @@ export default function DashboardLayout() {
           >
             Sair
           </button>
+          </div>
         </aside>
+
+        {/* Conteúdo principal */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-base-100">
+          <Outlet />
+        </main>
       </div>
     </div>
   )
