@@ -9,13 +9,6 @@ const api = axios.create({
   },
 })
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
 
 export const apiService = {
   async get(url: string, config?: any) {
@@ -67,7 +60,6 @@ export const authService = {
 
   async logout() {
     await api.post('/api/logout')
-    localStorage.removeItem('token')
   },
 
   async me() {
