@@ -58,12 +58,65 @@ export const authService = {
     return response.data
   },
 
+  async register(name: string, email: string, password: string, password_confirmation: string) {
+    await this.getCsrfToken()
+    const response = await api.post('/api/register', { name, email, password, password_confirmation })
+    return response.data
+  },
+
   async logout() {
     await api.post('/api/logout')
   },
 
   async me() {
     const response = await api.get('/api/user')
+    return response.data
+  },
+
+  async googleRedirect(): Promise<{ url: string }> {
+    const response = await api.get('/api/auth/google/redirect')
+    return response.data
+  },
+}
+
+export interface PlanTypeOption {
+  value: number
+  label: string
+  monthly_price: number
+  vehicle_limit: number
+}
+
+export interface UserPlanDetail {
+  type: number
+  name: string
+  vehicle_limit: number
+}
+
+export interface UserPlanSubscription {
+  started_at: string
+  expires_at: string | null
+  is_active: boolean
+}
+
+export interface UserPlan {
+  current_plan: UserPlanDetail
+  subscription: UserPlanSubscription
+  available_reports: string[]
+}
+
+export const planService = {
+  async getUserPlan(): Promise<UserPlan> {
+    const response = await api.get('/api/plan')
+    return response.data
+  },
+
+  async getPlanTypes(): Promise<PlanTypeOption[]> {
+    const response = await api.get('/api/enums/plan-types')
+    return response.data
+  },
+
+  async assignPlan(plan: number): Promise<UserPlan> {
+    const response = await api.post('/api/plan', { plan })
     return response.data
   },
 }

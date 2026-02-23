@@ -28,10 +28,10 @@ interface Plan {
 
 const plans: Plan[] = [
   {
-    name: 'Free',
-    subtitle: 'O "Test Drive"',
-    monthlyPrice: 0,
-    yearlyPrice: 0,
+    name: 'Básico',
+    subtitle: 'O "Primeiro Passo"',
+    monthlyPrice: 9.9,
+    yearlyPrice: 7.92,
     description: 'Para quem quer começar a organizar',
     vehicles: '1 veículo',
     features: [
@@ -44,7 +44,7 @@ const plans: Plan[] = [
       { text: 'Gráficos de gastos', included: false },
       { text: 'Previsão de manutenção IA', included: false },
     ],
-    cta: 'Começar Grátis',
+    cta: 'Assinar Básico',
     highlight: false,
     badge: null,
   },
@@ -56,7 +56,7 @@ const plans: Plan[] = [
     description: 'Para entusiastas e profissionais',
     vehicles: 'Até 3 veículos',
     features: [
-      { text: 'Tudo do plano Free', included: true },
+      { text: 'Tudo do plano Básico', included: true },
       { text: 'Upload de Notas Fiscais (ilimitado)', included: true },
       { text: 'Exportação PDF profissional', included: true },
       { text: 'Gráficos e dashboards detalhados', included: true },

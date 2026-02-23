@@ -6,7 +6,7 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth()
+  const { user, hasPlan, loading } = useAuth()
   const location = useLocation()
 
   if (loading) {
@@ -15,6 +15,10 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />
+  }
+
+  if (!hasPlan) {
+    return <Navigate to="/onboarding/plan" replace />
   }
 
   return <>{children}</>

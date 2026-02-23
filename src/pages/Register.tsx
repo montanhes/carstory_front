@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom'
+import { Link, useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 function GoogleIcon() {
@@ -13,17 +13,16 @@ function GoogleIcon() {
   )
 }
 
-export default function Login() {
+export default function Register() {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [remember, setRemember] = useState(false)
+  const [passwordConfirmation, setPasswordConfirmation] = useState('')
   const [loading, setLoading] = useState(false)
-  const { login, initiateGoogleAuth, user, loading: authLoading } = useAuth()
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [error, setError] = useState('')
+  const { register, initiateGoogleAuth, user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
-
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard'
 
   if (!authLoading && user) {
     return <Navigate to="/dashboard" replace />
@@ -31,12 +30,21 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (password !== passwordConfirmation) {
+      setError('As senhas não coincidem')
+      return
+    }
     setLoading(true)
+    setError('')
     try {
-      await login(email, password, remember)
-      navigate(from, { replace: true })
-    } catch (error) {
-      console.error('Erro ao fazer login:', error)
+      await register(name, email, password, passwordConfirmation)
+      navigate('/onboarding/plan', { replace: true })
+    } catch (err: any) {
+      const errors = err?.response?.data?.errors as Record<string, string[]> | undefined
+      const msg: string = err?.response?.data?.message
+        ?? (errors ? Object.values(errors)[0]?.[0] : null)
+        ?? 'Erro ao criar conta. Tente novamente.'
+      setError(msg as string)
     } finally {
       setLoading(false)
     }
@@ -46,11 +54,31 @@ export default function Login() {
     <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
       <div className="w-full max-w-sm md:max-w-md">
         <div className="text-center mb-6 md:mb-8">
-          <h1 className="text-3xl sm:text-4xl md:text-4xl font-bold text-base-content mb-2">CarStory</h1>
-          <p className="text-base-content/70 text-sm md:text-base">Acesse sua conta</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-base-content mb-2">CarStory</h1>
+          <p className="text-base-content/70 text-sm md:text-base">Crie sua conta gratuitamente</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="card bg-base-100 shadow-xl p-4 sm:p-6 md:p-8 space-y-4 md:space-y-6">
+        <form onSubmit={handleSubmit} className="card bg-base-100 shadow-xl p-4 sm:p-6 md:p-8 space-y-4 md:space-y-5">
+          {error && (
+            <div className="alert alert-error py-2 text-sm">
+              <span>{error}</span>
+            </div>
+          )}
+
+          <div className="form-control">
+            <label className="label py-1">
+              <span className="label-text text-xs md:text-sm">Nome completo</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Seu nome"
+              className="input input-bordered input-sm md:input-md w-full"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
           <div className="form-control">
             <label className="label py-1">
               <span className="label-text text-xs md:text-sm">E-mail</span>
@@ -71,24 +99,27 @@ export default function Login() {
             </label>
             <input
               type="password"
-              placeholder="••••••••"
+              placeholder="Mínimo 8 caracteres"
               className="input input-bordered input-sm md:input-md w-full"
               required
+              minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           <div className="form-control">
-            <label className="label cursor-pointer justify-start gap-2 py-1">
-              <input
-                type="checkbox"
-                className="checkbox checkbox-xs md:checkbox-sm"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-              />
-              <span className="label-text text-xs md:text-sm">Lembrar de mim</span>
+            <label className="label py-1">
+              <span className="label-text text-xs md:text-sm">Confirmar senha</span>
             </label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              className="input input-bordered input-sm md:input-md w-full"
+              required
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+            />
           </div>
 
           <button
@@ -96,7 +127,7 @@ export default function Login() {
             disabled={loading}
             className="btn btn-primary btn-sm md:btn-md w-full mt-2"
           >
-            {loading ? <span className="loading loading-spinner loading-xs md:loading-sm"></span> : 'Entrar'}
+            {loading ? <span className="loading loading-spinner loading-xs md:loading-sm"></span> : 'Criar conta'}
           </button>
 
           <div className="divider text-xs text-base-content/40">ou</div>
@@ -113,15 +144,15 @@ export default function Login() {
             {googleLoading
               ? <span className="loading loading-spinner loading-xs md:loading-sm"></span>
               : <GoogleIcon />}
-            Entrar com Google
+            Cadastrar com Google
           </button>
         </form>
 
         <div className="text-center mt-6 space-y-2">
           <p className="text-base-content/70 text-xs md:text-sm">
-            Não tem uma conta?{' '}
-            <Link to="/register" className="link link-primary font-medium">
-              Criar conta
+            Já tem uma conta?{' '}
+            <Link to="/login" className="link link-primary font-medium">
+              Entrar
             </Link>
           </p>
           <Link to="/" className="link link-hover text-base-content/70 text-xs md:text-sm block">

@@ -1,13 +1,16 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Home from './pages/Home'
 import Login from './pages/Login'
+import Register from './pages/Register'
+import AuthCallback from './pages/AuthCallback'
+import PlanSelection from './pages/PlanSelection'
 import Dashboard from './pages/Dashboard'
 import Vehicles from './pages/Vehicles'
 import VehicleDetails from './pages/VehicleDetails'
 import Profile from './pages/Profile'
 import DashboardLayout from './layouts/DashboardLayout'
 import ProtectedRoute from './components/ProtectedRoute'
-import { AuthProvider } from './contexts/AuthContext'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ExpensesByCategory } from './pages/reports/ExpensesByCategory'
 import { ExpensesByVehicle } from './pages/reports/ExpensesByVehicle'
@@ -22,6 +25,22 @@ import { AlertsReport } from './pages/reports/AlertsReport'
 import { BudgetReport } from './pages/reports/BudgetReport'
 import './config/chartConfig'
 
+function PlanSelectionRoute({ children }: { children: React.ReactNode }) {
+  const { user, hasPlan, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-base-200 flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    )
+  }
+
+  if (!user) return <Navigate to="/login" replace />
+  if (hasPlan) return <Navigate to="/dashboard" replace />
+  return <>{children}</>
+}
+
 function App() {
   return (
     <ThemeProvider>
@@ -30,6 +49,16 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route
+              path="/onboarding/plan"
+              element={
+                <PlanSelectionRoute>
+                  <PlanSelection />
+                </PlanSelectionRoute>
+              }
+            />
             <Route
               path="/dashboard"
               element={

@@ -8,7 +8,6 @@ import {
   FileText,
   Share2,
   Shield,
-  ArrowRight,
   Sparkles,
   Car,
   Wrench,
@@ -219,8 +218,7 @@ export default function Home() {
                 onClick={() => navigate('/login')}
                 className="btn btn-primary btn-sm gap-2 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all"
               >
-                Começar grátis
-                <ArrowRight size={16} />
+                Começar agora
               </button>
             </div>
           </div>
@@ -274,8 +272,7 @@ export default function Home() {
                 onClick={() => navigate('/login')}
                 className="btn btn-primary btn-lg gap-2 shadow-2xl shadow-primary/30 hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 group"
               >
-                Começar grátis agora
-                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                Começar agora
               </button>
               <a href="#planos" className="btn btn-ghost btn-lg gap-2 hover:bg-base-content/5">
                 Ver planos
@@ -459,7 +456,7 @@ export default function Home() {
               className="btn btn-lg bg-base-100 text-primary hover:bg-base-200 gap-2 shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
             >
               <Zap size={20} />
-              Começar Agora — É Grátis
+              Começar Agora
             </button>
           </div>
         </div>

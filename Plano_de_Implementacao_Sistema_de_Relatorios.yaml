@@ -1,0 +1,816 @@
+ Plano de Implementação: Sistema de Relatórios CarStory API
+
+ Contexto
+
+ O usuário solicitou a implementação de um sistema completo de relatórios para a API CarStory em 3 fases de priorização (Essenciais, Análise, Avançados). O sistema deve fornecer endpoints REST que retornam dados formatados para serem consumidos por um frontend React com Chart.js.
+
+ Problema a resolver:
+ - Falta de insights sobre despesas de veículos
+ - Ausência de análises consolidadas e comparativas
+ - Necessidade de visualizações gráficas para tomada de decisão
+
+ Resultado esperado:
+ - 12 endpoints de relatórios organizados em 3 fases
+ - Dados otimizados para Chart.js
+ - Seguir padrões do projeto (TDD, Sanctum, validação)
+ - Documentação completa para frontend React
+
+ ---
+ Arquitetura da Solução
+
+ Estrutura de Arquivos
+
+ app/
+ ├── Http/
+ │   ├── Controllers/
+ │   │   └── ReportController.php
+ │   └── Requests/
+ │       └── ReportFilterRequest.php
+ ├── Services/
+ │   └── Reports/
+ │       ├── DashboardReportService.php
+ │       ├── ExpenseByCategoryService.php
+ │       ├── ExpenseByVehicleService.php
+ │       ├── ExtractReportService.php
+ │       ├── TemporalAnalysisService.php
+ │       ├── FuelAnalysisService.php
+ │       ├── VehicleComparisonService.php
+ │       ├── MaintenanceReportService.php
+ │       ├── DepreciationReportService.php
+ │       ├── FleetBenchmarkService.php
+ │       ├── AlertsService.php
+ │       └── BudgetReportService.php
+ └── Repositories/
+     ├── VehicleExpenseRepositoryInterface.php
+     └── VehicleExpenseRepository.php
+
+ tests/Feature/Reports/
+ ├── DashboardReportTest.php
+ ├── ExpenseByCategoryReportTest.php
+ ├── ExpenseByVehicleReportTest.php
+ ├── ExtractReportTest.php
+ ├── TemporalAnalysisReportTest.php
+ ├── FuelAnalysisReportTest.php
+ ├── VehicleComparisonReportTest.php
+ ├── MaintenanceReportTest.php
+ ├── DepreciationReportTest.php
+ ├── FleetBenchmarkReportTest.php
+ ├── AlertsReportTest.php
+ └── BudgetReportTest.php
+
+
+ Decisões Arquiteturais
+
+ 1. Services Layer: Criar app/Services/Reports/ para isolar lógica de agregação e cálculos
+ 2. Repository Pattern: Criar VehicleExpenseRepository para manter consistência com VehicleRepository
+ 3. Form Request: Criar ReportFilterRequest para validar filtros comuns (datas, vehicle_id, etc)
+ 4. Response Format: Arrays simples compatíveis com Chart.js
+ 5. Autorização: Todos os relatórios filtram por user_id = Auth::id()
+
+ ---
+ Implementação Fase 1 (Essenciais)
+
+ 1. Dashboard Consolidado
+
+ Endpoint: GET /api/reports/dashboard
+
+ Query Params:
+ - period (opcional): monthly, yearly, all (default: monthly)
+ - start_date (opcional): Y-m-d
+ - end_date (opcional): Y-m-d
+
+ Response:
+ {
+   "total_expenses": 15847.50,
+   "average_per_vehicle": 5282.50,
+   "period_comparison": {
+     "current": 15847.50,
+     "previous": 12340.00,
+     "variation_percent": 28.4
+   },
+   "expenses_over_time": {
+     "labels": ["Jan", "Fev", "Mar"],
+     "datasets": [
+       {
+         "label": "Despesas",
+         "data": [5200, 4800, 5847.50]
+       }
+     ]
+   },
+   "vehicles_count": 3,
+   "expenses_count": 47
+ }
+
+ Service: DashboardReportService
+ - Agregações SQL: SUM, AVG, COUNT
+ - Comparação período atual vs anterior
+ - Agrupamento temporal para gráfico de evolução
+
+ Teste: tests/Feature/Reports/DashboardReportTest.php
+ - Testa com/sem filtros
+ - Testa comparação de períodos
+ - Testa autorização (usuário vê apenas seus dados)
+
+ ---
+ 2. Despesas por Categoria
+
+ Endpoint: GET /api/reports/expenses/by-category
+
+ Query Params:
+ - start_date (opcional): Y-m-d
+ - end_date (opcional): Y-m-d
+ - vehicle_id (opcional): filtrar por veículo específico
+
+ Response:
+ {
+   "total": 15847.50,
+   "by_category": [
+     {
+       "category": "Combustível",
+       "category_id": 1,
+       "total": 8500.00,
+       "percentage": 53.6,
+       "count": 25
+     },
+     {
+       "category": "Manutenção",
+       "category_id": 2,
+       "total": 4200.00,
+       "percentage": 26.5,
+       "count": 12
+     }
+   ],
+   "chart_data": {
+     "labels": ["Combustível", "Manutenção", "Seguros"],
+     "datasets": [
+       {
+         "label": "Despesas por Categoria",
+         "data": [8500, 4200, 3147.50]
+       }
+     ]
+   }
+ }
+
+ Service: ExpenseByCategoryService
+ - Query: GROUP BY expense_category
+ - Calcular percentuais
+ - Ordenar por total DESC
+
+ Teste: tests/Feature/Reports/ExpenseByCategoryReportTest.php
+
+ ---
+ 3. Despesas por Veículo
+
+ Endpoint: GET /api/reports/expenses/by-vehicle
+
+ Query Params:
+ - start_date (opcional)
+ - end_date (opcional)
+ - sort_by (opcional): total (default), count, average
+
+ Response:
+ {
+   "total": 15847.50,
+   "vehicles": [
+     {
+       "vehicle_id": 1,
+       "vehicle_name": "Toyota Corolla",
+       "total_expenses": 8500.00,
+       "expenses_count": 28,
+       "average_expense": 303.57,
+       "last_expense_date": "2026-02-10"
+     },
+     {
+       "vehicle_id": 2,
+       "vehicle_name": "Honda Civic",
+       "total_expenses": 7347.50,
+       "expenses_count": 19,
+       "average_expense": 386.71,
+       "last_expense_date": "2026-02-08"
+     }
+   ],
+   "chart_data": {
+     "labels": ["Toyota Corolla", "Honda Civic"],
+     "datasets": [
+       {
+         "label": "Total de Despesas",
+         "data": [8500, 7347.50]
+       }
+     ]
+   }
+ }
+
+ Service: ExpenseByVehicleService
+ - JOIN vehicles + aggregate expenses
+ - Calcular médias
+ - Ranking por total
+
+ Teste: tests/Feature/Reports/ExpenseByVehicleReportTest.php
+
+ ---
+ 4. Extrato Detalhado
+
+ Endpoint: GET /api/reports/expenses/extract
+
+ Query Params:
+ - start_date (opcional)
+ - end_date (opcional)
+ - vehicle_id (opcional)
+ - category (opcional): ID da categoria
+ - expense_type (opcional): ID do tipo
+ - payment_method (opcional): ID do método
+ - per_page (opcional): paginação (default: 15, max: 100)
+ - sort_by (opcional): date (default), value
+ - sort_order (opcional): desc (default), asc
+
+ Response:
+ {
+   "data": [
+     {
+       "id": 45,
+       "vehicle_name": "Toyota Corolla",
+       "expense_category_label": "Combustível",
+       "expense_type_label": "Gasolina",
+       "value": 250.00,
+       "formatted_value": "R$ 250,00",
+       "payment_method_label": "Cartão de Crédito",
+       "expense_date": "2026-02-15",
+       "odometer_mileage": 50280,
+       "notes": "Posto Shell"
+     }
+   ],
+   "pagination": {
+     "current_page": 1,
+     "per_page": 15,
+     "total": 47,
+     "last_page": 4
+   },
+   "summary": {
+     "total_value": 15847.50,
+     "count": 47
+   }
+ }
+
+ Service: ExtractReportService
+ - Query builder com filtros dinâmicos
+ - Paginação Laravel
+ - Eager load vehicle
+
+ Teste: tests/Feature/Reports/ExtractReportTest.php
+ - Testa todos os filtros
+ - Testa paginação
+ - Testa ordenação
+
+ ---
+ Implementação Fase 2 (Análise)
+
+ 5. Análise Temporal
+
+ Endpoint: GET /api/reports/temporal-analysis
+
+ Query Params:
+ - start_date (opcional)
+ - end_date (opcional)
+ - vehicle_id (opcional)
+ - group_by (opcional): day, week, month (default), quarter, year
+
+ Response:
+ {
+   "period": "monthly",
+   "data": [
+     {
+       "period": "2025-12",
+       "period_label": "Dezembro 2025",
+       "total": 4200.00,
+       "count": 12,
+       "average": 350.00
+     },
+     {
+       "period": "2026-01",
+       "period_label": "Janeiro 2026",
+       "total": 5800.00,
+       "count": 18,
+       "average": 322.22
+     }
+   ],
+   "chart_data": {
+     "labels": ["Dez/25", "Jan/26", "Fev/26"],
+     "datasets": [
+       {
+         "label": "Despesas",
+         "data": [4200, 5800, 5847.50]
+       }
+     ]
+   },
+   "trends": {
+     "average_monthly": 5282.50,
+     "highest_month": {
+       "period": "2026-02",
+       "value": 5847.50
+     },
+     "lowest_month": {
+       "period": "2025-12",
+       "value": 4200.00
+     }
+   }
+ }
+
+ Service: TemporalAnalysisService
+ - Agrupamento dinâmico (YEAR, MONTH, DAY)
+ - Identificar picos e vales
+ - Calcular tendências
+
+ Teste: tests/Feature/Reports/TemporalAnalysisReportTest.php
+
+ ---
+ 6. Análise de Combustível
+
+ Endpoint: GET /api/reports/fuel-analysis
+
+ Query Params:
+ - start_date (opcional)
+ - end_date (opcional)
+ - vehicle_id (opcional)
+
+ Response:
+ {
+   "total_fuel_expenses": 8500.00,
+   "by_vehicle": [
+     {
+       "vehicle_id": 1,
+       "vehicle_name": "Toyota Corolla",
+       "fuel_type": "Flex",
+       "total_spent": 5200.00,
+       "count": 18,
+       "average_per_fill": 288.89
+     }
+   ],
+   "by_fuel_type": [
+     {
+       "fuel_type": "Gasolina",
+       "total": 5200.00,
+       "count": 18,
+       "average": 288.89
+     },
+     {
+       "fuel_type": "Etanol",
+       "total": 3300.00,
+       "count": 15,
+       "average": 220.00
+     }
+   ],
+   "chart_data": {
+     "labels": ["Toyota Corolla", "Honda Civic"],
+     "datasets": [
+       {
+         "label": "Gastos com Combustível",
+         "data": [5200, 3300]
+       }
+     ]
+   }
+ }
+
+ Service: FuelAnalysisService
+ - Filtrar por expense_category = ExpenseCategory::FUEL
+ - JOIN vehicles para pegar fuel_type
+ - Agrupar por veículo e tipo de combustível
+
+ Teste: tests/Feature/Reports/FuelAnalysisReportTest.php
+
+ ---
+ 7. Comparação entre Veículos
+
+ Endpoint: GET /api/reports/vehicle-comparison
+
+ Query Params:
+ - start_date (opcional)
+ - end_date (opcional)
+ - vehicle_ids[] (opcional): array de IDs para comparar
+
+ Response:
+ {
+   "vehicles": [
+     {
+       "vehicle_id": 1,
+       "name": "Toyota Corolla",
+       "fuel_type": "Flex",
+       "total_expenses": 8500.00,
+       "fuel_expenses": 5200.00,
+       "maintenance_expenses": 2800.00,
+       "average_expense": 303.57,
+       "expenses_count": 28
+     }
+   ],
+   "comparison_chart": {
+     "labels": ["Toyota Corolla", "Honda Civic"],
+     "datasets": [
+       {
+         "label": "Total",
+         "data": [8500, 7347.50]
+       },
+       {
+         "label": "Combustível",
+         "data": [5200, 4500]
+       },
+       {
+         "label": "Manutenção",
+         "data": [2800, 2400]
+       }
+     ]
+   },
+   "most_economical": {
+     "vehicle_id": 2,
+     "name": "Honda Civic",
+     "total": 7347.50
+   }
+ }
+
+ Service: VehicleComparisonService
+ - Comparar múltiplas métricas
+ - Identificar mais econômico
+
+ Teste: tests/Feature/Reports/VehicleComparisonReportTest.php
+
+ ---
+ 8. Relatório de Manutenção
+
+ Endpoint: GET /api/reports/maintenance
+
+ Query Params:
+ - start_date (opcional)
+ - end_date (opcional)
+ - vehicle_id (opcional)
+
+ Response:
+ {
+   "total_maintenance": 4200.00,
+   "by_vehicle": [
+     {
+       "vehicle_id": 1,
+       "vehicle_name": "Toyota Corolla",
+       "total": 2800.00,
+       "count": 8,
+       "last_maintenance": "2026-02-10",
+       "maintenance_types": [
+         {
+           "type": "Troca de óleo",
+           "count": 3,
+           "total": 900.00
+         }
+       ]
+     }
+   ],
+   "by_type": [
+     {
+       "type": "Troca de óleo",
+       "count": 5,
+       "total": 1500.00,
+       "average": 300.00
+     }
+   ],
+   "chart_data": {
+     "labels": ["Troca de óleo", "Pneus", "Freios"],
+     "datasets": [
+       {
+         "label": "Gastos com Manutenção",
+         "data": [1500, 1200, 1500]
+       }
+     ]
+   }
+ }
+
+ Service: MaintenanceReportService
+ - Filtrar por expense_category = ExpenseCategory::MAINTENANCE
+ - Agrupar por expense_type
+
+ Teste: tests/Feature/Reports/MaintenanceReportTest.php
+
+ ---
+ Implementação Fase 3 (Avançados)
+
+ 9. Relatório de Depreciação
+
+ Endpoint: GET /api/reports/depreciation
+
+ Query Params:
+ - vehicle_id (opcional)
+
+ Response:
+ {
+   "vehicles": [
+     {
+       "vehicle_id": 1,
+       "name": "Toyota Corolla",
+       "acquisition_date": "2020-01-15",
+       "acquisition_price": 50000.00,
+       "total_expenses": 15847.50,
+       "total_investment": 65847.50,
+       "estimated_current_value": 38000.00,
+       "depreciation": 12000.00,
+       "depreciation_percent": 24.0,
+       "months_owned": 73,
+       "monthly_depreciation": 164.38
+     }
+   ],
+   "chart_data": {
+     "labels": ["Toyota Corolla"],
+     "datasets": [
+       {
+         "label": "Valor Aquisição",
+         "data": [50000]
+       },
+       {
+         "label": "Valor Estimado Atual",
+         "data": [38000]
+       },
+       {
+         "label": "Total Investido",
+         "data": [65847.50]
+       }
+     ]
+   }
+ }
+
+ Service: DepreciationReportService
+ - Usar acquisition_price do Vehicle
+ - Usar accessor total_investment
+ - Calcular depreciação mensal
+
+ Teste: tests/Feature/Reports/DepreciationReportTest.php
+
+ ---
+ 10. Benchmark de Frota
+
+ Endpoint: GET /api/reports/fleet-benchmark
+
+ Query Params:
+ - start_date (opcional)
+ - end_date (opcional)
+
+ Response:
+ {
+   "fleet_size": 3,
+   "total_expenses": 15847.50,
+   "average_per_vehicle": 5282.50,
+   "most_economical": {
+     "vehicle_id": 2,
+     "name": "Honda Civic",
+     "total": 4500.00
+   },
+   "most_expensive": {
+     "vehicle_id": 1,
+     "name": "Toyota Corolla",
+     "total": 8500.00
+   },
+   "distribution": {
+     "labels": ["Toyota Corolla", "Honda Civic", "Fiat Uno"],
+     "datasets": [
+       {
+         "label": "Distribuição de Custos",
+         "data": [8500, 4500, 2847.50]
+       }
+     ]
+   },
+   "by_category": [
+     {
+       "category": "Combustível",
+       "total": 8500.00,
+       "average_per_vehicle": 2833.33
+     }
+   ]
+ }
+
+ Service: FleetBenchmarkService
+ - Agregar todos os veículos do usuário
+ - Identificar extremos (mais caro, mais barato)
+ - Distribuição por categoria
+
+ Teste: tests/Feature/Reports/FleetBenchmarkReportTest.php
+
+ ---
+ 11. Alertas e Lembretes
+
+ Endpoint: GET /api/reports/alerts
+
+ Query Params:
+ - vehicle_id (opcional)
+
+ Response:
+ {
+   "alerts": [
+     {
+       "type": "maintenance_due",
+       "priority": "high",
+       "vehicle_id": 1,
+       "vehicle_name": "Toyota Corolla",
+       "message": "Última troca de óleo há 6 meses",
+       "date": "2025-08-10"
+     },
+     {
+       "type": "high_expense",
+       "priority": "medium",
+       "vehicle_id": 1,
+       "vehicle_name": "Toyota Corolla",
+       "message": "Gastos acima da média nos últimos 30 dias",
+       "value": 2500.00
+     }
+   ]
+ }
+
+ Service: AlertsService
+ - Lógica heurística para gerar alertas
+ - Verificar última manutenção
+ - Comparar gastos atuais vs média
+
+ Teste: tests/Feature/Reports/AlertsReportTest.php
+
+ ---
+ 12. Relatório de Orçamento
+
+ Endpoint: GET /api/reports/budget
+
+ Query Params:
+ - vehicle_id (opcional)
+ - category (opcional)
+
+ Response:
+ {
+   "period": "2026-02",
+   "budget": 5000.00,
+   "actual": 5847.50,
+   "difference": -847.50,
+   "percentage_used": 116.95,
+   "by_category": [
+     {
+       "category": "Combustível",
+       "budget": 2500.00,
+       "actual": 2800.00,
+       "difference": -300.00,
+       "status": "over_budget"
+     }
+   ],
+   "projection": {
+     "end_of_month": 6200.00,
+     "based_on_days": 15
+   }
+ }
+
+ Service: BudgetReportService
+ - Requer tabela budgets (criar migration)
+ - Comparar planejado vs realizado
+ - Projeção baseada em média diária
+
+ Teste: tests/Feature/Reports/BudgetReportTest.php
+
+ NOTA: Requer feature adicional de cadastro de orçamentos.
+
+ ---
+ Passos de Implementação (Ordem TDD)
+
+ Setup Inicial
+
+ 1. Ativar RefreshDatabase no Pest.php
+ uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class)
+     ->in('Feature');
+ 2. Criar ReportFilterRequest
+   - Validar datas (Y-m-d format)
+   - Validar vehicle_id (exists:vehicles,id + pertence ao usuário)
+   - Validar category, expense_type, payment_method (enums)
+ 3. Criar VehicleExpenseRepository
+   - Interface + Implementação
+   - Binding no RepositoryServiceProvider
+ 4. Criar ReportController vazio
+   - Constructor injection do VehicleExpenseRepository
+   - Skeleton de todos os métodos
+ 5. Adicionar rotas em api.php
+ Route::middleware('auth:sanctum')->prefix('reports')->group(function () {
+     Route::get('dashboard', [ReportController::class, 'dashboard']);
+     Route::get('expenses/by-category', [ReportController::class, 'expensesByCategory']);
+     // ... etc
+ });
+
+ Fase 1 (Essenciais) - 4 relatórios
+
+ Por cada relatório:
+ 1. Criar teste Feature (RED)
+ 2. Criar Service
+ 3. Implementar método no Controller
+ 4. Rodar teste (GREEN)
+ 5. Refatorar queries para performance
+ 6. Rodar Pint + PHPStan
+
+ Fase 2 (Análise) - 4 relatórios
+
+ Mesmo workflow da Fase 1.
+
+ Fase 3 (Avançados) - 4 relatórios
+
+ Para relatório de Orçamento:
+ - Criar migration budgets table
+ - Criar model Budget
+ - Criar CRUD de orçamentos (separado)
+
+ ---
+ Arquivos Críticos a Modificar
+
+ - app/Http/Controllers/ReportController.php (novo)
+ - app/Http/Requests/ReportFilterRequest.php (novo)
+ - app/Services/Reports/*.php (12 novos)
+ - app/Repositories/VehicleExpenseRepositoryInterface.php (novo)
+ - app/Repositories/VehicleExpenseRepository.php (novo)
+ - app/Providers/RepositoryServiceProvider.php (adicionar binding)
+ - routes/api.php (adicionar rotas)
+ - tests/Pest.php (descomentar RefreshDatabase)
+ - tests/Feature/Reports/*.php (12 novos)
+
+ ---
+ Performance e Otimizações
+
+ 1. Eager Loading: with(['vehicle', 'user']) quando necessário
+ 2. Agregações SQL: Usar DB::raw() para cálculos complexos
+ 3. Índices: vehicle_expenses já tem índices em (user_id, expense_date), (expense_category, expense_date)
+ 4. Cache: Considerar cache de 5 minutos para relatórios pesados (Fase 3)
+ 5. Paginação: Usar em extratos detalhados
+
+ ---
+ Validação e Testes
+
+ Testes Comuns em Todos os Relatórios
+
+ - ✓ Usuário não autenticado retorna 401
+ - ✓ Usuário vê apenas seus dados (authorization)
+ - ✓ Filtros de data funcionam corretamente
+ - ✓ Filtros de veículo funcionam
+ - ✓ Response tem estrutura esperada
+ - ✓ Dados são calculados corretamente (fixtures conhecidos)
+
+ Quality Gates
+
+ sail artisan test --coverage          # Coverage > 80%
+ sail composer pint                    # Code style
+ sail composer phpstan                 # Static analysis
+
+
+ ---
+ Documentação para Frontend (React + Chart.js)
+
+ Ao final da implementação, gerar documento REPORTS_API.md contendo:
+
+ 1. Lista de Endpoints: URL, método, autenticação
+ 2. Request/Response Examples: JSON completo
+ 3. Query Params: nome, tipo, obrigatório, valores aceitos
+ 4. Estrutura Chart.js: mapeamento direto response → Chart.js config
+ 5. Códigos de Status HTTP: significado de cada código
+ 6. Exemplos de Integração React:
+ import { Line } from 'react-chartjs-2';
+
+ const response = await fetch('/api/reports/dashboard', {
+   headers: { 'Authorization': `Bearer ${token}` }
+ });
+ const data = await response.json();
+
+ <Line data={data.expenses_over_time} />
+ 7. Tratamento de Erros: como lidar com 401, 403, 422
+ 8. Loading States: endpoints que podem demorar
+ 9. Filtros: exemplos de construção de query strings
+
+ ---
+ Riscos e Mitigações
+
+ ┌─────────────────────────────────────────────┬─────────────────────────────────────────────────┐
+ │                    Risco                    │                    Mitigação                    │
+ ├─────────────────────────────────────────────┼─────────────────────────────────────────────────┤
+ │ Performance ruim em agregações grandes      │ Implementar cache de 5min, adicionar índices    │
+ ├─────────────────────────────────────────────┼─────────────────────────────────────────────────┤
+ │ Dados inconsistentes (despesas sem veículo) │ Cascade delete já configurado, adicionar testes │
+ ├─────────────────────────────────────────────┼─────────────────────────────────────────────────┤
+ │ Divisão por zero em médias                  │ Validar count > 0 antes de calcular             │
+ ├─────────────────────────────────────────────┼─────────────────────────────────────────────────┤
+ │ Datas inválidas em filtros                  │ ReportFilterRequest com validação rigorosa      │
+ ├─────────────────────────────────────────────┼─────────────────────────────────────────────────┤
+ │ Sobrecarga de testes                        │ Foco em happy path + edge cases principais      │
+ └─────────────────────────────────────────────┴─────────────────────────────────────────────────┘
+
+ ---
+ Estimativa de Esforço
+
+ - Fase 1: 4 relatórios × 30min = 2h
+ - Fase 2: 4 relatórios × 30min = 2h
+ - Fase 3: 4 relatórios × 45min = 3h (Budget precisa migration)
+ - Testes: 12 testes × 15min = 3h
+ - Documentação: 1h
+ - Total: ~11h
+
+ ---
+ Resultado Final
+
+ Ao completar este plano:
+
+ ✓ 12 endpoints REST funcionais
+ ✓ Dados prontos para Chart.js
+ ✓ TDD completo (testes passando)
+ ✓ Code style (Pint)
+ ✓ Static analysis (PHPStan)
+ ✓ Documentação completa para frontend React
+ ✓ Performance otimizada com agregações SQL
+ ✓ Autorização implementada (user_id isolation)
