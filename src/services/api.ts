@@ -70,7 +70,7 @@ export const authService = {
 
   async me() {
     const response = await api.get('/api/user')
-    return response.data
+    return response.data.user ?? response.data
   },
 
   async googleRedirect(): Promise<{ url: string }> {

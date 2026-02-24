@@ -1,14 +1,12 @@
 import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { useTheme } from '../contexts/ThemeContext'
-import { FileText } from 'lucide-react'
+import { FileText, CircleUserRound } from 'lucide-react'
 
 export default function DashboardLayout() {
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const { logout } = useAuth()
-  const { theme, setTheme, themes } = useTheme()
+  const { user, logout } = useAuth()
 
   const handleLogout = async () => {
     await logout()
@@ -18,7 +16,6 @@ export default function DashboardLayout() {
   const navItems = [
     { to: '/dashboard', label: 'Início', end: true },
     { to: 'vehicles', label: 'Veículos', end: false },
-    { to: 'profile', label: 'Perfil', end: false },
   ]
 
   const reportSections = {
@@ -83,6 +80,51 @@ export default function DashboardLayout() {
           </svg>
         </button>
         <span className="text-xl font-bold text-base-content ml-2 lg:ml-0">CarStory</span>
+
+        {/* User menu — extremo direito */}
+        <div className="ml-auto dropdown dropdown-end">
+          <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <CircleUserRound size={28} className="text-base-content/70" />
+            )}
+          </div>
+          <div
+            tabIndex={0}
+            className="dropdown-content bg-base-200 border border-base-300 rounded-box shadow-lg z-50 w-60 p-2 mt-1"
+          >
+            {/* Info do usuário */}
+            <div className="px-3 py-2 mb-1 border-b border-base-300">
+              <p className="text-xs text-base-content/60">Olá,</p>
+              <p className="font-semibold text-sm truncate">{user?.name}</p>
+              <p className="text-xs text-base-content/60 truncate">{user?.email}</p>
+            </div>
+
+            {/* Perfil */}
+            <ul className="menu menu-sm p-0 mb-1">
+              <li>
+                <NavLink to="profile" className={({ isActive }) => isActive ? 'active' : ''}>
+                  Perfil
+                </NavLink>
+              </li>
+            </ul>
+
+            {/* Logout */}
+            <div className="border-t border-base-300 mt-1 pt-1">
+              <button
+                onClick={handleLogout}
+                className="btn btn-outline btn-error btn-sm w-full"
+              >
+                Sair
+              </button>
+            </div>
+          </div>
+        </div>
       </header>
 
       {/* Área abaixo do header: sidebar + conteúdo */}
@@ -198,34 +240,6 @@ export default function DashboardLayout() {
             </li>
           </ul>
 
-          {/* Divider */}
-          <div className="divider my-2"></div>
-
-          {/* Theme Selector */}
-          <div className="form-control mb-3">
-            <label className="label py-1">
-              <span className="label-text text-xs font-semibold">Tema</span>
-            </label>
-            <select
-              value={theme}
-              onChange={(e) => setTheme(e.target.value as any)}
-              className="select select-bordered select-sm w-full"
-            >
-              {themes.map((t) => (
-                <option key={t} value={t}>
-                  {t.charAt(0).toUpperCase() + t.slice(1)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            className="btn btn-outline btn-error btn-sm w-full"
-          >
-            Sair
-          </button>
           </div>
         </aside>
 

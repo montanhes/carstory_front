@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { authService, apiService, type User } from '../services/api'
 import ConfirmDialog from '../components/ConfirmDialog'
 import AlertDialog from '../components/AlertDialog'
@@ -17,6 +18,7 @@ interface ProfileFormData {
 export default function Profile() {
   const navigate = useNavigate()
   const { logout } = useAuth()
+  const { theme, setTheme, themes } = useTheme()
   const [user, setUser] = useState<User | null>(null)
   const [formData, setFormData] = useState<ProfileFormData>({
     name: '',
@@ -57,8 +59,7 @@ export default function Profile() {
       try {
         setLoading(true)
         // Usar a rota /api/user que retorna o usuário autenticado
-        const response = await authService.me()
-        const userData = response.user || response
+        const userData = await authService.me()
         setUser(userData)
         setFormData({
           name: userData.name || '',
@@ -272,6 +273,29 @@ export default function Profile() {
                 {saving ? <span className="loading loading-spinner loading-xs"></span> : 'Salvar Alterações'}
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Preferências */}
+      <div className="card bg-base-200 shadow-md border border-base-300 max-w-2xl mt-6">
+        <div className="card-body p-4 md:p-6">
+          <h3 className="text-lg font-semibold mb-4">Preferências</h3>
+          <div className="form-control max-w-xs">
+            <label className="label py-1">
+              <span className="label-text">Tema</span>
+            </label>
+            <select
+              value={theme}
+              onChange={(e) => setTheme(e.target.value as any)}
+              className="select select-bordered select-sm md:select-md w-full"
+            >
+              {themes.map((t) => (
+                <option key={t} value={t}>
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
