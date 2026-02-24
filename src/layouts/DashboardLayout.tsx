@@ -106,7 +106,7 @@ export default function DashboardLayout() {
             </div>
 
             {/* Perfil */}
-            <ul className="menu menu-sm p-0 mb-1">
+            <ul className="menu menu-sm p-0 mb-1 w-full">
               <li>
                 <NavLink to="profile" className={({ isActive }) => isActive ? 'active' : ''}>
                   Perfil
