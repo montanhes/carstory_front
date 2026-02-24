@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard'
 import Vehicles from './pages/Vehicles'
 import VehicleDetails from './pages/VehicleDetails'
 import Profile from './pages/Profile'
+import PaymentSuccess from './pages/PaymentSuccess'
 import DashboardLayout from './layouts/DashboardLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
@@ -71,6 +72,7 @@ function App() {
               <Route path="vehicles" element={<Vehicles />} />
               <Route path="vehicles/:id" element={<VehicleDetails />} />
               <Route path="profile" element={<Profile />} />
+              <Route path="payment/success" element={<PaymentSuccess />} />
               {/* Fase 1 - Relatórios Essenciais */}
               <Route path="reports/by-category" element={<ExpensesByCategory />} />
               <Route path="reports/by-vehicle" element={<ExpensesByVehicle />} />

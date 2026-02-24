@@ -283,7 +283,7 @@ export default function PricingSection() {
                 </ul>
 
                 <button
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate('/register')}
                   className={`btn w-full transition-all duration-200 ${
                     plan.highlight
                       ? 'btn-primary shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30'
@@ -321,7 +321,7 @@ export default function PricingSection() {
               </p>
             </div>
             <button
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/register')}
               className="btn btn-primary btn-sm shadow-lg shadow-primary/20 shrink-0"
             >
               Saber Mais

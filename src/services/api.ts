@@ -366,6 +366,70 @@ export const expenseService = {
   },
 }
 
+// Interfaces de Pagamento
+export interface Payment {
+  id: number
+  user_id: number
+  plan_type: number
+  plan_label: string
+  amount: number
+  formatted_amount: string
+  status: string
+  status_label: string
+  payment_method: string
+  external_id: string | null
+  paid_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface PaymentCheckout {
+  checkout_url: string
+  payment_id: number
+}
+
+export interface PaymentStatusOption {
+  value: string
+  label: string
+}
+
+export interface PaymentFilters {
+  status?: string
+  page?: number
+}
+
+export const paymentService = {
+  async createCheckout(plan: number, returnUrl: string, completionUrl: string): Promise<PaymentCheckout> {
+    const response = await api.post('/api/payments/checkout', {
+      plan,
+      return_url: returnUrl,
+      completion_url: completionUrl,
+    })
+    return response.data
+  },
+
+  async getPayments(filters?: PaymentFilters): Promise<PaginatedResponse<Payment>> {
+    const params = new URLSearchParams()
+    if (filters?.status) params.append('status', filters.status)
+    if (filters?.page) params.append('page', filters.page.toString())
+
+    const queryString = params.toString()
+    const url = `/api/payments${queryString ? `?${queryString}` : ''}`
+    const response = await api.get(url)
+    return response.data
+  },
+
+  async getPayment(id: number): Promise<Payment> {
+    const response = await api.get(`/api/payments/${id}`)
+    return response.data
+  },
+
+  async getPaymentStatuses(): Promise<PaymentStatusOption[]> {
+    const response = await api.get('/api/enums/payment-statuses')
+    return response.data
+  },
+}
+
 // Interfaces de Relatórios
 export interface DashboardReport {
   total_expenses: number;

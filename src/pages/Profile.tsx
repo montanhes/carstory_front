@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
-import { authService, apiService, transferService, type User, type Transfer } from '../services/api'
+import { authService, apiService, transferService, paymentService, type User, type Transfer, type Payment, type PaginatedResponse } from '../services/api'
 import ConfirmDialog from '../components/ConfirmDialog'
 import AlertDialog from '../components/AlertDialog'
 import { Copy, Check } from 'lucide-react'
@@ -33,6 +33,9 @@ export default function Profile() {
   const [copied, setCopied] = useState(false)
   const [receivedTransfers, setReceivedTransfers] = useState<Transfer[]>([])
   const [respondingId, setRespondingId] = useState<number | null>(null)
+  const [payments, setPayments] = useState<PaginatedResponse<Payment> | null>(null)
+  const [paymentsLoading, setPaymentsLoading] = useState(true)
+  const [paymentsPage, setPaymentsPage] = useState(1)
 
   const formatPersonalCode = (code: string) =>
     code.match(/.{1,4}/g)?.join('-') ?? code
@@ -43,6 +46,33 @@ export default function Profile() {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }, [user?.personal_code])
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'paid': return 'badge-success'
+      case 'pending': return 'badge-warning'
+      case 'expired': return 'badge-ghost'
+      case 'cancelled': return 'badge-error'
+      case 'refunded': return 'badge-info'
+      default: return 'badge-ghost'
+    }
+  }
+
+  const loadPayments = useCallback(async (page: number) => {
+    setPaymentsLoading(true)
+    try {
+      const data = await paymentService.getPayments({ page })
+      setPayments(data)
+    } catch {
+      // silently fail
+    } finally {
+      setPaymentsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadPayments(paymentsPage)
+  }, [paymentsPage, loadPayments])
 
   const handleRespondTransfer = async (transferId: number, status: 'accepted' | 'rejected') => {
     setRespondingId(transferId)
@@ -409,6 +439,94 @@ export default function Profile() {
               ))}
             </select>
           </div>
+        </div>
+      </div>
+
+      {/* Histórico de Pagamentos */}
+      <div className="card bg-base-200 shadow-md border border-base-300 max-w-2xl mt-6">
+        <div className="card-body p-4 md:p-6">
+          <h3 className="text-lg font-semibold mb-4">Histórico de Pagamentos</h3>
+
+          {paymentsLoading ? (
+            <div className="flex justify-center py-8">
+              <span className="loading loading-spinner loading-md"></span>
+            </div>
+          ) : !payments || payments.data.length === 0 ? (
+            <p className="text-sm text-base-content/60 text-center py-4">
+              Nenhum pagamento encontrado.
+            </p>
+          ) : (
+            <>
+              {/* Mobile: cards empilhados */}
+              <div className="space-y-3 md:hidden">
+                {payments.data.map((payment) => (
+                  <div key={payment.id} className="p-3 bg-base-100 rounded-lg border border-base-300">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium text-sm">{payment.plan_label}</span>
+                      <span className={`badge badge-sm ${getStatusBadgeClass(payment.status)}`}>
+                        {payment.status_label}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-base-content/60">
+                      <span>{new Date(payment.created_at).toLocaleDateString('pt-BR')}</span>
+                      <span className="font-semibold text-base-content">{payment.formatted_amount}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop: tabela */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Plano</th>
+                      <th>Valor</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payments.data.map((payment) => (
+                      <tr key={payment.id}>
+                        <td className="text-sm">{new Date(payment.created_at).toLocaleDateString('pt-BR')}</td>
+                        <td className="text-sm font-medium">{payment.plan_label}</td>
+                        <td className="text-sm">{payment.formatted_amount}</td>
+                        <td>
+                          <span className={`badge badge-sm ${getStatusBadgeClass(payment.status)}`}>
+                            {payment.status_label}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Paginação */}
+              {payments.last_page > 1 && (
+                <div className="flex justify-center gap-2 mt-4">
+                  <button
+                    onClick={() => setPaymentsPage((p) => Math.max(1, p - 1))}
+                    disabled={payments.current_page <= 1}
+                    className="btn btn-sm btn-ghost"
+                  >
+                    Anterior
+                  </button>
+                  <span className="btn btn-sm btn-ghost no-animation">
+                    {payments.current_page} / {payments.last_page}
+                  </span>
+                  <button
+                    onClick={() => setPaymentsPage((p) => Math.min(payments!.last_page, p + 1))}
+                    disabled={payments.current_page >= payments.last_page}
+                    className="btn btn-sm btn-ghost"
+                  >
+                    Próxima
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 

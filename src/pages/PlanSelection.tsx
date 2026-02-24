@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { CheckCircle2, Zap, ArrowRight } from 'lucide-react'
-import { planService, type PlanTypeOption } from '../services/api'
+import { planService, paymentService, type PlanTypeOption } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
 
 const PLAN_FEATURES: Record<number, string[]> = {
@@ -46,8 +45,7 @@ const PLAN_HIGHLIGHT: Record<number, boolean> = {
 }
 
 export default function PlanSelection() {
-  const { checkAuth, user } = useAuth()
-  const navigate = useNavigate()
+  const { user } = useAuth()
   const [plans, setPlans] = useState<PlanTypeOption[]>([])
   const [fetchLoading, setFetchLoading] = useState(true)
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null)
@@ -71,11 +69,13 @@ export default function PlanSelection() {
     setSubmitting(true)
     setSubmitError('')
     try {
-      await planService.assignPlan(selectedPlan)
-      await checkAuth()
-      navigate('/dashboard', { replace: true })
-    } catch {
-      setSubmitError('Erro ao ativar o plano. Tente novamente.')
+      const returnUrl = window.location.origin + '/onboarding/plan'
+      const completionUrl = window.location.origin + '/dashboard/payment/success'
+      const { checkout_url } = await paymentService.createCheckout(selectedPlan, returnUrl, completionUrl)
+      window.location.href = checkout_url
+    } catch (err: any) {
+      const message = err.response?.data?.message || 'Erro ao iniciar o pagamento. Tente novamente.'
+      setSubmitError(message)
       setSubmitting(false)
     }
   }
