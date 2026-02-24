@@ -57,11 +57,11 @@ export default function AlertDialog({
       className="modal"
       onClose={handleClose}
     >
-      <div className="modal-box bg-base-200 border border-base-300 p-0 overflow-hidden">
+      <div className="modal-box bg-base-200 border border-base-300 p-0 overflow-hidden max-w-sm sm:max-w-md">
         <div className={getAlertClass(type)}>
-          <div>
+          <div className="min-w-0">
             <h3 className="font-bold">{title}</h3>
-            <div className="text-sm">{message}</div>
+            <div className="text-sm break-words whitespace-normal">{message}</div>
           </div>
         </div>
         <div className="modal-action p-4">

@@ -179,7 +179,10 @@ export default function DashboardLayout() {
                 <ul className="mt-1 ml-6 space-y-2">
                   {/* Essenciais */}
                   <li>
-                    <div className="text-xs font-semibold text-base-content/50 px-4 py-1">ESSENCIAIS</div>
+                    <div className="flex items-center gap-2 px-4 py-1.5 mt-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-primary">Essenciais</span>
+                      <span className="flex-1 border-t border-base-content/15"></span>
+                    </div>
                     <ul className="space-y-1">
                       {reportSections.essentials.map((item) => (
                         <li key={item.to}>
@@ -203,7 +206,10 @@ export default function DashboardLayout() {
 
                   {/* Análise */}
                   <li>
-                    <div className="text-xs font-semibold text-base-content/50 px-4 py-1 mt-2">ANÁLISE</div>
+                    <div className="flex items-center gap-2 px-4 py-1.5 mt-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-primary">Análise</span>
+                      <span className="flex-1 border-t border-base-content/15"></span>
+                    </div>
                     <ul className="space-y-1">
                       {reportSections.analysis.map((item) => (
                         <li key={item.to}>
@@ -227,7 +233,10 @@ export default function DashboardLayout() {
 
                   {/* Avançados */}
                   <li>
-                    <div className="text-xs font-semibold text-base-content/50 px-4 py-1 mt-2">AVANÇADOS</div>
+                    <div className="flex items-center gap-2 px-4 py-1.5 mt-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-primary">Avançados</span>
+                      <span className="flex-1 border-t border-base-content/15"></span>
+                    </div>
                     <ul className="space-y-1">
                       {reportSections.advanced.map((item) => (
                         <li key={item.to}>

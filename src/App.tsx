@@ -61,6 +61,16 @@ function App() {
               }
             />
             <Route
+              path="/dashboard/payment/success"
+              element={
+                <ProtectedRoute requirePlan={false}>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<PaymentSuccess />} />
+            </Route>
+            <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
@@ -72,7 +82,6 @@ function App() {
               <Route path="vehicles" element={<Vehicles />} />
               <Route path="vehicles/:id" element={<VehicleDetails />} />
               <Route path="profile" element={<Profile />} />
-              <Route path="payment/success" element={<PaymentSuccess />} />
               {/* Fase 1 - Relatórios Essenciais */}
               <Route path="reports/by-category" element={<ExpensesByCategory />} />
               <Route path="reports/by-vehicle" element={<ExpensesByVehicle />} />

@@ -3,9 +3,10 @@ import { useAuth } from '../contexts/AuthContext'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
+  requirePlan?: boolean
 }
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, requirePlan = true }: ProtectedRouteProps) {
   const { user, hasPlan, loading } = useAuth()
   const location = useLocation()
 
@@ -17,7 +18,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  if (!hasPlan) {
+  if (requirePlan && !hasPlan) {
     return <Navigate to="/onboarding/plan" replace />
   }
 

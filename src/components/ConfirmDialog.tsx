@@ -49,7 +49,7 @@ export default function ConfirmDialog({
     >
       <div className="modal-box bg-base-200 border border-base-300">
         <h3 className="font-bold text-lg text-base-content">{title}</h3>
-        <p className="py-4 text-base-content/70">{message}</p>
+        <p className="py-4 text-base-content/70 break-words whitespace-normal">{message}</p>
         <div className="modal-action gap-2">
           <button
             onClick={handleCancel}

@@ -654,7 +654,7 @@ export default function VehicleDetails() {
                   />
                   {transferFieldError && (
                     <label className="label">
-                      <span className="label-text-alt text-error">{transferFieldError}</span>
+                      <span className="label-text-alt text-error whitespace-normal break-words">{transferFieldError}</span>
                     </label>
                   )}
                   <label className="label">
