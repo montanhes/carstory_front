@@ -43,6 +43,7 @@ export interface User {
   email: string
   email_verified_at: string | null
   disabled_at: string | null
+  personal_code: string | null
   created_at: string
   updated_at: string
 }

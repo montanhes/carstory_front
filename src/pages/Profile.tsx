@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { authService, apiService, type User } from '../services/api'
 import ConfirmDialog from '../components/ConfirmDialog'
 import AlertDialog from '../components/AlertDialog'
+import { Copy, Check } from 'lucide-react'
 
 type AlertType = 'error' | 'success' | 'info' | 'warning'
 
@@ -29,6 +30,17 @@ export default function Profile() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [passwordChanged, setPasswordChanged] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const formatPersonalCode = (code: string) =>
+    code.match(/.{1,4}/g)?.join('-') ?? code
+
+  const handleCopyCode = useCallback(async () => {
+    if (!user?.personal_code) return
+    await navigator.clipboard.writeText(user.personal_code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [user?.personal_code])
 
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean
@@ -277,11 +289,35 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Código de Transferência */}
+      {user?.personal_code && (
+        <div className="card bg-base-200 shadow-md border border-base-300 max-w-2xl mt-6">
+          <div className="card-body p-4 md:p-6">
+            <h3 className="text-lg font-semibold mb-1">Código de Transferência</h3>
+            <p className="text-sm text-base-content/60 mb-4">
+              Compartilhe este código para transferir dados entre contas ou dispositivos.
+            </p>
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-xl md:text-2xl tracking-widest font-bold text-base-content">
+                {formatPersonalCode(user.personal_code)}
+              </span>
+              <button
+                onClick={handleCopyCode}
+                className="btn btn-ghost btn-sm"
+                title="Copiar código"
+              >
+                {copied ? <Check size={16} className="text-success" /> : <Copy size={16} />}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Preferências */}
       <div className="card bg-base-200 shadow-md border border-base-300 max-w-2xl mt-6">
         <div className="card-body p-4 md:p-6">
           <h3 className="text-lg font-semibold mb-4">Preferências</h3>
-          <div className="form-control max-w-xs">
+          <div className="form-control">
             <label className="label py-1">
               <span className="label-text">Tema</span>
             </label>
