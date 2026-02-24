@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { vehicleService, expenseService, enumService, type Vehicle, type VehicleExpense, type EnumOption, type ExpenseCategoryWithTypes, type ExpenseFilters as ExpenseFiltersType } from '../services/api'
+import { vehicleService, expenseService, enumService, transferService, type Vehicle, type VehicleExpense, type EnumOption, type ExpenseCategoryWithTypes, type ExpenseFilters as ExpenseFiltersType, type Transfer } from '../services/api'
 import ExpenseFormModal from '../components/ExpenseFormModal'
 import ExpenseFilters from '../components/ExpenseFilters'
 import ConfirmDialog from '../components/ConfirmDialog'
 import AlertDialog from '../components/AlertDialog'
-import { CreditCard, Gauge, FileText, Paperclip, MessageSquare, Edit2, Trash2, ArrowLeft, Filter, X } from 'lucide-react'
+import { CreditCard, Gauge, FileText, Paperclip, MessageSquare, Edit2, Trash2, ArrowLeft, Filter, X, ArrowRightLeft } from 'lucide-react'
 
 type AlertType = 'error' | 'success' | 'info' | 'warning'
 
@@ -26,6 +26,12 @@ export default function VehicleDetails() {
     sort_direction: 'desc',
   })
   const [totalExpenses, setTotalExpenses] = useState(0)
+  const [vehicleTransfers, setVehicleTransfers] = useState<Transfer[]>([])
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false)
+  const [personalCodeInput, setPersonalCodeInput] = useState('')
+  const [transferFieldError, setTransferFieldError] = useState('')
+  const [transferLoading, setTransferLoading] = useState(false)
+  const [transferConfirming, setTransferConfirming] = useState(false)
 
   // Dialog states
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -58,14 +64,16 @@ export default function VehicleDetails() {
 
       try {
         setLoading(true)
-        const [vehicleData, categoriesWithTypesData, methodsData] = await Promise.all([
+        const [vehicleData, categoriesWithTypesData, methodsData, sentTransfers] = await Promise.all([
           vehicleService.showVehicle(parseInt(id)),
           enumService.getExpenseCategoriesWithTypes(),
           enumService.getPaymentMethods(),
+          transferService.getSentTransfers(),
         ])
         setVehicle(vehicleData)
         setExpenseCategoriesWithTypes(categoriesWithTypesData)
         setPaymentMethods(methodsData)
+        setVehicleTransfers(sentTransfers.filter(t => t.vehicle_id === parseInt(id)))
       } catch (err) {
         setError('Erro ao carregar dados. Tente novamente.')
         console.error('Erro ao carregar dados:', err)
@@ -156,6 +164,75 @@ export default function VehicleDetails() {
     })
   }
 
+  const pendingTransfer = vehicleTransfers.find(t => t.status === 'pending')
+
+  const handleCodeInput = (raw: string) => {
+    const clean = raw.replace(/[^A-Z0-9]/gi, '').toUpperCase().slice(0, 12)
+    const formatted = clean.match(/.{1,4}/g)?.join('-') ?? clean
+    setPersonalCodeInput(formatted)
+    setTransferFieldError('')
+    setTransferConfirming(false)
+  }
+
+  const handleConfirmTransfer = () => {
+    const code = personalCodeInput.replace(/-/g, '').trim()
+    if (code.length < 12) {
+      setTransferFieldError('O código deve ter 12 caracteres.')
+      return
+    }
+    setTransferFieldError('')
+    setTransferConfirming(true)
+  }
+
+  const handleSendTransfer = async () => {
+    if (!id) return
+    const code = personalCodeInput.replace(/-/g, '').trim()
+    setTransferLoading(true)
+    try {
+      const transfer = await transferService.sendTransfer(parseInt(id), code)
+      setVehicleTransfers(prev => [transfer, ...prev])
+      setIsTransferModalOpen(false)
+      setPersonalCodeInput('')
+      setTransferConfirming(false)
+      setAlertDialog({ isOpen: true, type: 'success', title: 'Transferência Enviada', message: 'A solicitação foi enviada. Aguarde o destinatário aceitar.' })
+    } catch (err: any) {
+      setTransferConfirming(false)
+      const msg: string = err.response?.data?.message || ''
+      if (err.response?.status === 422) {
+        if (msg.toLowerCase().includes('mesmo')) {
+          setTransferFieldError('Você não pode transferir para si mesmo.')
+        } else if (msg.toLowerCase().includes('pendente') || msg.toLowerCase().includes('pending')) {
+          setTransferFieldError('Este veículo já tem uma transferência pendente.')
+        } else {
+          setTransferFieldError('Código inválido ou não encontrado.')
+        }
+      } else if (err.response?.status === 403) {
+        setTransferFieldError('O destinatário não pode receber veículos (sem plano ou limite atingido).')
+      } else {
+        setTransferFieldError('Erro ao enviar transferência. Tente novamente.')
+      }
+    } finally {
+      setTransferLoading(false)
+    }
+  }
+
+  const handleCancelTransfer = (transferId: number) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Cancelar Transferência',
+      message: 'Tem certeza que deseja cancelar esta transferência pendente?',
+      onConfirm: async () => {
+        try {
+          await transferService.cancelTransfer(transferId)
+          setVehicleTransfers(prev => prev.map(t => t.id === transferId ? { ...t, status: 'cancelled' as const, status_label: 'Cancelada' } : t))
+          setAlertDialog({ isOpen: true, type: 'success', title: 'Cancelada', message: 'Transferência cancelada com sucesso.' })
+        } catch (err: any) {
+          setAlertDialog({ isOpen: true, type: 'error', title: 'Erro', message: err.response?.data?.message || 'Erro ao cancelar.' })
+        }
+      },
+    })
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -200,7 +277,33 @@ export default function VehicleDetails() {
       {/* Vehicle Info */}
       <div className="card bg-base-200 shadow-md mb-6 border border-base-300">
         <div className="card-body p-4 sm:p-6">
-          <h3 className="text-lg font-semibold mb-3">Informações do Veículo</h3>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h3 className="text-lg font-semibold">Informações do Veículo</h3>
+            {pendingTransfer ? (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 text-sm text-warning">
+                  <ArrowRightLeft size={14} />
+                  <span className="font-medium">Pendente</span>
+                  <span className="text-base-content/60 hidden sm:inline">→ {pendingTransfer.receiver_name}</span>
+                </div>
+                <button
+                  onClick={() => handleCancelTransfer(pendingTransfer.id)}
+                  className="btn btn-xs btn-outline btn-warning"
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => { setPersonalCodeInput(''); setTransferFieldError(''); setTransferConfirming(false); setIsTransferModalOpen(true) }}
+                className="btn btn-outline btn-sm gap-2"
+              >
+                <ArrowRightLeft size={15} />
+                Transferir Veículo
+              </button>
+            )}
+          </div>
+
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 text-sm">
             {vehicle.license_plate && (
               <div>
@@ -487,6 +590,135 @@ export default function VehicleDetails() {
           )}
         </div>
       </div>
+
+      {/* Histórico de Transferências */}
+      {vehicleTransfers.length > 0 && (
+        <div className="card bg-base-200 shadow-md border border-base-300 mt-6">
+          <div className="card-body p-4 sm:p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <ArrowRightLeft size={18} />
+              Histórico de Transferências
+            </h3>
+            <div className="space-y-2">
+              {vehicleTransfers.map(t => (
+                <div key={t.id} className="flex flex-wrap items-center gap-3 py-2 border-b border-base-300 last:border-0 text-sm">
+                  <div className="flex-1 min-w-0">
+                    <span className="text-base-content/60">Para:</span>
+                    <span className="ml-1 font-medium">{t.receiver_name}</span>
+                  </div>
+                  <span className="text-xs text-base-content/50">
+                    {new Date(t.created_at).toLocaleDateString('pt-BR')}
+                  </span>
+                  <span className={`badge badge-sm ${
+                    t.status === 'pending' ? 'badge-warning' :
+                    t.status === 'accepted' ? 'badge-success' :
+                    t.status === 'rejected' ? 'badge-error' :
+                    'badge-ghost'
+                  }`}>
+                    {t.status_label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Transferência */}
+      {isTransferModalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-lg">
+            <h3 className="font-bold text-xl mb-1 flex items-center gap-2">
+              <ArrowRightLeft size={20} />
+              Transferir Veículo
+            </h3>
+            <p className="text-sm text-base-content/60 mb-6">
+              Você está prestes a transferir <strong>{vehicle?.name}</strong>. Esta ação enviará uma solicitação ao destinatário, que precisará aceitar para concluir a transferência.
+            </p>
+
+            {!transferConfirming ? (
+              <>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Código de Transferência do destinatário</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={personalCodeInput}
+                    onChange={e => handleCodeInput(e.target.value)}
+                    placeholder="Ex: YWT6-WU88-FEZU"
+                    className={`input input-bordered input-lg w-full font-mono tracking-widest text-center ${transferFieldError ? 'input-error' : ''}`}
+                    maxLength={14}
+                    autoFocus
+                    onKeyDown={e => e.key === 'Enter' && handleConfirmTransfer()}
+                  />
+                  {transferFieldError && (
+                    <label className="label">
+                      <span className="label-text-alt text-error">{transferFieldError}</span>
+                    </label>
+                  )}
+                  <label className="label">
+                    <span className="label-text-alt text-base-content/50 whitespace-normal break-words">O código tem 12 caracteres e pode ser encontrado na tela de Perfil do destinatário.</span>
+                  </label>
+                </div>
+                <div className="modal-action">
+                  <button
+                    onClick={() => setIsTransferModalOpen(false)}
+                    className="btn btn-ghost"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleConfirmTransfer}
+                    className="btn btn-error"
+                    disabled={personalCodeInput.replace(/-/g, '').length < 12}
+                  >
+                    Continuar
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="bg-error/10 border border-error/30 rounded-lg p-4 mb-6">
+                  <p className="text-sm font-semibold text-error mb-3">Confirme os dados antes de enviar:</p>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-base-content/60">Veículo:</span>
+                      <span className="font-semibold">{vehicle?.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-base-content/60">Código do destinatário:</span>
+                      <span className="font-mono font-bold tracking-widest">{personalCodeInput}</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-base-content/50 mb-4">
+                  Ao confirmar, o destinatário receberá a solicitação e poderá aceitar ou recusar. O veículo só será transferido após a aceitação.
+                </p>
+                <div className="modal-action">
+                  <button
+                    onClick={() => setTransferConfirming(false)}
+                    className="btn btn-ghost"
+                    disabled={transferLoading}
+                  >
+                    Voltar
+                  </button>
+                  <button
+                    onClick={handleSendTransfer}
+                    className="btn btn-error"
+                    disabled={transferLoading}
+                  >
+                    {transferLoading
+                      ? <span className="loading loading-spinner loading-sm" />
+                      : 'Confirmar Transferência'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="modal-backdrop" onClick={() => !transferLoading && (setIsTransferModalOpen(false), setTransferConfirming(false))} />
+        </div>
+      )}
 
       <ExpenseFormModal
         isOpen={isModalOpen}

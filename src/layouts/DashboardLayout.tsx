@@ -1,12 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { FileText, CircleUserRound } from 'lucide-react'
+import { transferService } from '../services/api'
 
 export default function DashboardLayout() {
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const { user, logout } = useAuth()
+  const [pendingTransferCount, setPendingTransferCount] = useState(0)
+
+  useEffect(() => {
+    transferService.getReceivedTransfers()
+      .then((transfers) => setPendingTransferCount(transfers.length))
+      .catch(() => {})
+  }, [])
 
   const handleLogout = async () => {
     await logout()
@@ -83,7 +91,7 @@ export default function DashboardLayout() {
 
         {/* User menu — extremo direito */}
         <div className="ml-auto dropdown dropdown-end">
-          <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
+          <div tabIndex={0} role="button" className="btn btn-ghost btn-circle relative">
             {user?.avatar ? (
               <img
                 src={user.avatar}
@@ -92,6 +100,11 @@ export default function DashboardLayout() {
               />
             ) : (
               <CircleUserRound size={28} className="text-base-content/70" />
+            )}
+            {pendingTransferCount > 0 && (
+              <span className="badge badge-error badge-xs absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-[1.1rem] p-0 flex items-center justify-center text-[10px]">
+                {pendingTransferCount}
+              </span>
             )}
           </div>
           <div

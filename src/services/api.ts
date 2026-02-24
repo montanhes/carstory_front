@@ -219,6 +219,45 @@ export const vehicleService = {
   },
 }
 
+export interface Transfer {
+  id: number
+  vehicle_id: number
+  sender_id: number
+  receiver_id: number
+  status: 'pending' | 'accepted' | 'rejected' | 'cancelled'
+  status_label: string
+  sender_name: string
+  receiver_name: string
+  vehicle_name: string
+  responded_at: string | null
+  created_at: string
+}
+
+export const transferService = {
+  async sendTransfer(vehicleId: number, personalCode: string): Promise<Transfer> {
+    const response = await api.post(`/api/vehicles/${vehicleId}/transfer`, { personal_code: personalCode })
+    return response.data
+  },
+
+  async cancelTransfer(transferId: number): Promise<void> {
+    await api.post(`/api/transfers/${transferId}/cancel`)
+  },
+
+  async getReceivedTransfers(): Promise<Transfer[]> {
+    const response = await api.get('/api/transfers/received')
+    return response.data
+  },
+
+  async getSentTransfers(): Promise<Transfer[]> {
+    const response = await api.get('/api/transfers/sent')
+    return response.data
+  },
+
+  async respondToTransfer(transferId: number, status: 'accepted' | 'rejected'): Promise<void> {
+    await api.post(`/api/transfers/${transferId}/respond`, { status })
+  },
+}
+
 export interface VehicleExpense {
   id: number
   vehicle_id: number

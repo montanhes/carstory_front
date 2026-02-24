@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
-import { authService, apiService, type User } from '../services/api'
+import { authService, apiService, transferService, type User, type Transfer } from '../services/api'
 import ConfirmDialog from '../components/ConfirmDialog'
 import AlertDialog from '../components/AlertDialog'
 import { Copy, Check } from 'lucide-react'
@@ -31,6 +31,8 @@ export default function Profile() {
   const [saving, setSaving] = useState(false)
   const [passwordChanged, setPasswordChanged] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [receivedTransfers, setReceivedTransfers] = useState<Transfer[]>([])
+  const [respondingId, setRespondingId] = useState<number | null>(null)
 
   const formatPersonalCode = (code: string) =>
     code.match(/.{1,4}/g)?.join('-') ?? code
@@ -41,6 +43,34 @@ export default function Profile() {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }, [user?.personal_code])
+
+  const handleRespondTransfer = async (transferId: number, status: 'accepted' | 'rejected') => {
+    setRespondingId(transferId)
+    try {
+      await transferService.respondToTransfer(transferId, status)
+      setReceivedTransfers(prev => prev.filter(t => t.id !== transferId))
+      setAlertDialog({
+        isOpen: true,
+        type: 'success',
+        title: status === 'accepted' ? 'Transferência Aceita' : 'Transferência Recusada',
+        message: status === 'accepted'
+          ? 'O veículo foi transferido para sua conta com sucesso.'
+          : 'Você recusou a transferência.',
+      })
+    } catch (err: any) {
+      const httpStatus = err.response?.status
+      if (httpStatus === 409) {
+        setReceivedTransfers(prev => prev.filter(t => t.id !== transferId))
+        setAlertDialog({ isOpen: true, type: 'info', title: 'Aviso', message: 'Esta transferência não está mais pendente.' })
+      } else if (httpStatus === 403) {
+        setAlertDialog({ isOpen: true, type: 'error', title: 'Erro', message: 'Você não pode receber mais veículos. Verifique seu plano.' })
+      } else {
+        setAlertDialog({ isOpen: true, type: 'error', title: 'Erro', message: 'Erro ao processar transferência. Tente novamente.' })
+      }
+    } finally {
+      setRespondingId(null)
+    }
+  }
 
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean
@@ -70,8 +100,10 @@ export default function Profile() {
     const loadUser = async () => {
       try {
         setLoading(true)
-        // Usar a rota /api/user que retorna o usuário autenticado
-        const userData = await authService.me()
+        const [userData, transfers] = await Promise.all([
+          authService.me(),
+          transferService.getReceivedTransfers(),
+        ])
         setUser(userData)
         setFormData({
           name: userData.name || '',
@@ -79,6 +111,7 @@ export default function Profile() {
           password: '',
           password_confirmation: '',
         })
+        setReceivedTransfers(transfers)
       } catch (err) {
         console.error('Erro ao carregar perfil:', err)
         setAlertDialog({
@@ -202,6 +235,49 @@ export default function Profile() {
   return (
     <div>
       <h2 className="text-2xl md:text-3xl font-bold text-base-content mb-6">Meu Perfil</h2>
+
+      {/* Transferências Recebidas */}
+      {receivedTransfers.length > 0 && (
+        <div className="card bg-warning/10 border border-warning/40 shadow-md max-w-2xl mb-6">
+          <div className="card-body p-4 md:p-6">
+            <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
+              <span className="badge badge-warning">{receivedTransfers.length}</span>
+              Transferências Pendentes
+            </h3>
+            <p className="text-sm text-base-content/60 mb-4">
+              Você tem solicitações de transferência de veículo aguardando sua resposta.
+            </p>
+            <div className="space-y-3">
+              {receivedTransfers.map(t => (
+                <div key={t.id} className="flex flex-wrap items-center gap-3 p-3 bg-base-200 rounded-lg border border-base-300">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{t.vehicle_name}</p>
+                    <p className="text-xs text-base-content/60">
+                      De <strong>{t.sender_name}</strong> · {new Date(t.created_at).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => handleRespondTransfer(t.id, 'rejected')}
+                      disabled={respondingId === t.id}
+                      className="btn btn-outline btn-error btn-xs"
+                    >
+                      {respondingId === t.id ? <span className="loading loading-spinner loading-xs" /> : 'Recusar'}
+                    </button>
+                    <button
+                      onClick={() => handleRespondTransfer(t.id, 'accepted')}
+                      disabled={respondingId === t.id}
+                      className="btn btn-success btn-xs"
+                    >
+                      {respondingId === t.id ? <span className="loading loading-spinner loading-xs" /> : 'Aceitar'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Formulário de Edição */}
       <div className="card bg-base-200 shadow-md border border-base-300 max-w-2xl">
