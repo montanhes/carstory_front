@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CheckCircle2, Zap, ArrowRight } from 'lucide-react'
+import { CheckCircle2, Zap, ArrowRight, CreditCard } from 'lucide-react'
 import { planService, paymentService, type PlanTypeOption } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -69,9 +69,10 @@ export default function PlanSelection() {
     setSubmitting(true)
     setSubmitError('')
     try {
+      const billingCycle = isYearly ? 'yearly' : 'monthly'
       const returnUrl = window.location.origin + '/onboarding/plan'
       const completionUrl = window.location.origin + '/dashboard/payment/success'
-      const { checkout_url } = await paymentService.createCheckout(selectedPlan, returnUrl, completionUrl)
+      const { checkout_url } = await paymentService.createCheckout(selectedPlan, billingCycle, returnUrl, completionUrl)
       window.location.href = checkout_url
     } catch (err: any) {
       const message = err.response?.data?.message || 'Erro ao iniciar o pagamento. Tente novamente.'
@@ -132,7 +133,7 @@ export default function PlanSelection() {
           />
           <span className={`text-sm font-semibold transition-colors ${isYearly ? 'text-base-content' : 'text-base-content/50'}`}>
             Anual{' '}
-            <span className="text-primary text-xs font-bold">(Economize 20%)</span>
+            <span className="text-primary text-xs font-bold">(2 meses grátis)</span>
           </span>
         </div>
 
@@ -147,8 +148,9 @@ export default function PlanSelection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {plans.map((plan) => {
             const monthlyPrice = plan.monthly_price
-            const yearlyPrice = monthlyPrice * 0.8
-            const price = isYearly ? yearlyPrice : monthlyPrice
+            const annualTotal = plan.annual_price
+            const annualMonthly = annualTotal / 12
+            const price = isYearly ? annualMonthly : monthlyPrice
             const isSelected = selectedPlan === plan.value
             const isHighlighted = PLAN_HIGHLIGHT[plan.value] ?? false
             const features = PLAN_FEATURES[plan.value] ?? []
@@ -199,7 +201,7 @@ export default function PlanSelection() {
 
                   {isYearly && (
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="badge badge-primary badge-sm font-bold">-20%</span>
+                      <span className="badge badge-primary badge-sm font-bold">2 meses grátis</span>
                       <span className="text-xs text-base-content/50 line-through">
                         {monthlyPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       </span>
@@ -255,6 +257,10 @@ export default function PlanSelection() {
           <p className="text-xs text-base-content/40 mt-3">
             Cancele quando quiser · Sem compromisso
           </p>
+          <div className="flex items-center justify-center gap-2 mt-2 text-xs text-base-content/40">
+            <CreditCard size={14} />
+            <span>PIX e Cartão de Crédito</span>
+          </div>
         </div>
       </div>
     </div>

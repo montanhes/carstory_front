@@ -462,7 +462,7 @@ export default function Profile() {
                 {payments.data.map((payment) => (
                   <div key={payment.id} className="p-3 bg-base-100 rounded-lg border border-base-300">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-sm">{payment.plan_label}</span>
+                      <span className="font-medium text-sm">{payment.plan_label} — {payment.billing_cycle_label}</span>
                       <span className={`badge badge-sm ${getStatusBadgeClass(payment.status)}`}>
                         {payment.status_label}
                       </span>
@@ -490,7 +490,7 @@ export default function Profile() {
                     {payments.data.map((payment) => (
                       <tr key={payment.id}>
                         <td className="text-sm">{new Date(payment.created_at).toLocaleDateString('pt-BR')}</td>
-                        <td className="text-sm font-medium">{payment.plan_label}</td>
+                        <td className="text-sm font-medium">{payment.plan_label} — {payment.billing_cycle_label}</td>
                         <td className="text-sm">{payment.formatted_amount}</td>
                         <td>
                           <span className={`badge badge-sm ${getStatusBadgeClass(payment.status)}`}>

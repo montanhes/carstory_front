@@ -84,7 +84,15 @@ export interface PlanTypeOption {
   value: number
   label: string
   monthly_price: number
+  annual_price: number
   vehicle_limit: number
+}
+
+export interface BillingCycle {
+  value: string
+  label: string
+  duration_days: number
+  charged_months: number
 }
 
 export interface UserPlanDetail {
@@ -172,6 +180,11 @@ export const enumService = {
 
   async getPaymentMethods(): Promise<EnumOption[]> {
     const response = await api.get('/api/enums/payment-methods')
+    return response.data
+  },
+
+  async getBillingCycles(): Promise<BillingCycle[]> {
+    const response = await api.get('/api/enums/billing-cycles')
     return response.data
   },
 }
@@ -372,6 +385,8 @@ export interface Payment {
   user_id: number
   plan_type: number
   plan_label: string
+  billing_cycle: string
+  billing_cycle_label: string
   amount: number
   formatted_amount: string
   status: string
@@ -399,9 +414,10 @@ export interface PaymentFilters {
 }
 
 export const paymentService = {
-  async createCheckout(plan: number, returnUrl: string, completionUrl: string): Promise<PaymentCheckout> {
+  async createCheckout(plan: number, billingCycle: string, returnUrl: string, completionUrl: string): Promise<PaymentCheckout> {
     const response = await api.post('/api/payments/checkout', {
       plan,
+      billing_cycle: billingCycle,
       return_url: returnUrl,
       completion_url: completionUrl,
     })

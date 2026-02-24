@@ -31,7 +31,7 @@ const plans: Plan[] = [
     name: 'Básico',
     subtitle: 'O "Primeiro Passo"',
     monthlyPrice: 9.9,
-    yearlyPrice: 7.92,
+    yearlyPrice: +(9.9 * 10 / 12).toFixed(2),
     description: 'Para quem quer começar a organizar',
     vehicles: '1 veículo',
     features: [
@@ -52,7 +52,7 @@ const plans: Plan[] = [
     name: 'Premium',
     subtitle: 'O "Dono Cuidadoso"',
     monthlyPrice: 19.9,
-    yearlyPrice: 15.9,
+    yearlyPrice: +(19.9 * 10 / 12).toFixed(2),
     description: 'Para entusiastas e profissionais',
     vehicles: 'Até 3 veículos',
     features: [
@@ -73,7 +73,7 @@ const plans: Plan[] = [
     name: 'Family',
     subtitle: 'A "Garagem Compartilhada"',
     monthlyPrice: 39.9,
-    yearlyPrice: 31.9,
+    yearlyPrice: +(39.9 * 10 / 12).toFixed(2),
     description: 'Para famílias e colecionadores',
     vehicles: 'Até 10 veículos',
     features: [
@@ -94,7 +94,7 @@ const plans: Plan[] = [
     name: 'Business',
     subtitle: 'Frotas Leves',
     monthlyPrice: 99.9,
-    yearlyPrice: 79.9,
+    yearlyPrice: +(99.9 * 10 / 12).toFixed(2),
     description: 'Para MEIs e pequenas empresas',
     vehicles: 'Veículos ilimitados',
     features: [
@@ -164,7 +164,7 @@ export default function PricingSection() {
           className={`text-sm font-semibold transition-colors ${isYearly ? 'text-base-content' : 'text-base-content/50'}`}
         >
           Anual{' '}
-          <span className="text-primary text-xs font-bold">(Economize 20%)</span>
+          <span className="text-primary text-xs font-bold">(2 meses grátis)</span>
         </span>
       </div>
 
@@ -246,7 +246,7 @@ export default function PricingSection() {
 
                   {!isFree && isYearly && (
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="badge badge-primary badge-sm font-bold">-20%</span>
+                      <span className="badge badge-primary badge-sm font-bold">2 meses grátis</span>
                       <span className="text-xs text-base-content/50 line-through">
                         R$ {plan.monthlyPrice.toFixed(2).replace('.', ',')}
                       </span>
