@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import { authService, planService, type UserPlan } from '../services/api'
 
 interface User {
@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [plan, setPlan] = useState<UserPlan | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const userData = await authService.me()
       setUser(userData)
@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   const login = async (email: string, password: string, remember: boolean = false) => {
     await authService.login(email, password, remember)
