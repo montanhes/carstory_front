@@ -5,7 +5,107 @@
 @tailwind utilities;
 
 @plugin "daisyui" {
-  themes: abyss --default, emerald, cupcake, garden, forest, fantasy, black, luxury, dracula, autumn, lemonade, coffee, dim, nord
+  themes: 
+}
+
+@plugin "daisyui/theme" {
+  name: "dark";
+  default: false;
+  prefersdark: false;
+  color-scheme: "dark";
+  
+  /* Aumentei a luminosidade (L) para deixar o fundo menos "pesado" */
+  --color-base-100: oklch(25% 0.015 285.823); /* De 14% para 25% */
+  --color-base-200: oklch(30% 0.015 285.885); /* De 21% para 30% */
+  --color-base-300: oklch(35% 0.015 286.033); /* De 27% para 35% */
+  
+  /* O texto (content) precisa continuar bem claro para manter o contraste */
+  --color-base-content: oklch(96% 0.001 286.375);
+  
+  --color-primary: oklch(79% 0.184 86.047);
+  --color-primary-content: oklch(20% 0.026 102.212); /* Ajustado para contraste no fundo claro */
+  
+  --color-secondary: oklch(64% 0.246 16.439);
+  --color-secondary-content: oklch(96% 0.015 12.422);
+  
+  --color-accent: oklch(79% 0.184 86.047);
+  --color-accent-content: oklch(20% 0.026 102.212);
+  
+  --color-neutral: oklch(40% 0.02 285.786);
+  --color-neutral-content: oklch(98% 0 0);
+  
+  --color-info: oklch(62% 0.214 259.815);
+  --color-info-content: oklch(97% 0.014 254.604);
+  
+  --color-success: oklch(70% 0.14 182.503);
+  --color-success-content: oklch(98% 0.014 180.72);
+  
+  --color-warning: oklch(79% 0.184 86.047);
+  --color-warning-content: oklch(20% 0.026 102.212);
+  
+  --color-error: oklch(63% 0.237 25.331);
+  --color-error-content: oklch(97% 0.013 17.38);
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
+}
+
+@plugin "daisyui/theme" {
+  name: "light";
+  default: false;
+  prefersdark: false;
+  color-scheme: "light";
+
+  /* Bases claras: quanto maior a numeração (100 -> 300), mais "cinza" fica */
+  --color-base-100: oklch(98% 0.005 285.823); /* Fundo principal quase branco */
+  --color-base-200: oklch(94% 0.01 285.885);  /* Fundo secundário/cards */
+  --color-base-300: oklch(89% 0.01 286.033);  /* Bordas e divisores */
+  
+  /* Texto escuro para alto contraste no fundo claro */
+  --color-base-content: oklch(25% 0.02 285.786); 
+
+  /* Cores de destaque: mantive o matiz, mas ajustei a croma para ficarem vivas no fundo claro */
+  --color-primary: oklch(65% 0.184 86.047); 
+  --color-primary-content: oklch(98% 0.026 102.212);
+  
+  --color-secondary: oklch(55% 0.246 16.439);
+  --color-secondary-content: oklch(98% 0.015 12.422);
+  
+  --color-accent: oklch(65% 0.184 86.047);
+  --color-accent-content: oklch(98% 0.026 102.212);
+  
+  /* Tons neutros para estados desabilitados ou bordas */
+  --color-neutral: oklch(35% 0.02 285.786);
+  --color-neutral-content: oklch(98% 0 0);
+  
+  /* Cores de Feedback (ajustadas para visibilidade em fundo branco) */
+  --color-info: oklch(55% 0.214 259.815);
+  --color-info-content: oklch(98% 0.014 254.604);
+  
+  --color-success: oklch(50% 0.14 182.503);
+  --color-success-content: oklch(98% 0.014 180.72);
+  
+  --color-warning: oklch(65% 0.184 86.047);
+  --color-warning-content: oklch(20% 0.026 102.212);
+  
+  --color-error: oklch(55% 0.237 25.331);
+  --color-error-content: oklch(98% 0.013 17.38);
+
+  /* Mantive seus arredondamentos originais */
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
 }
 
 /* ===== Global ===== */

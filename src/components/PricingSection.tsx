@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import NumberFlow from '@number-flow/react'
 import confetti from 'canvas-confetti'
-import { CheckCircle2, X, Zap, FileText } from 'lucide-react'
+import { CheckCircle2, X, Zap } from 'lucide-react'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 
 /* ───────── Plan data ───────── */
@@ -96,7 +96,7 @@ const plans: Plan[] = [
     monthlyPrice: 99.9,
     yearlyPrice: +(99.9 * 10 / 12).toFixed(2),
     description: 'Para MEIs e pequenas empresas',
-    vehicles: 'Veículos ilimitados',
+    vehicles: 'Até 50 veículos',
     features: [
       { text: 'Tudo do plano Family', included: true },
       { text: 'Veículos ilimitados', included: true },
@@ -107,7 +107,7 @@ const plans: Plan[] = [
       { text: 'Suporte dedicado', included: true },
       { text: 'SLA garantido', included: true },
     ],
-    cta: 'Falar com Vendas',
+    cta: 'Assinar Business',
     highlight: false,
     badge: 'Empresarial',
   },
@@ -296,38 +296,6 @@ export default function PricingSection() {
             </CardWrapper>
           )
         })}
-      </div>
-
-      {/* Revenda Avulso */}
-      <div className="max-w-4xl mx-auto mt-14">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 border border-primary/20 p-6 sm:p-8">
-          <div
-            className="absolute inset-0 opacity-[0.03] pointer-events-none"
-            style={{
-              backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
-              backgroundSize: '16px 16px',
-            }}
-          />
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 relative">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <FileText className="text-primary" size={24} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-lg">Plano de Revenda Avulso</h3>
-              <p className="text-sm text-base-content/70 mt-1">
-                Não quer assinar? Gere um relatório completo do histórico do veículo por
-                apenas <strong className="text-primary">R$ 29,90</strong> para valorizar na
-                venda!
-              </p>
-            </div>
-            <button
-              onClick={() => navigate('/register')}
-              className="btn btn-primary btn-sm shadow-lg shadow-primary/20 shrink-0"
-            >
-              Saber Mais
-            </button>
-          </div>
-        </div>
       </div>
     </>
   )

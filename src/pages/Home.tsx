@@ -12,8 +12,12 @@ import {
   Car,
   Wrench,
   TrendingUp,
-  ChevronDown,
   Star,
+  Truck,
+  Fuel,
+  DollarSign,
+  Users,
+  ArrowRight,
 } from 'lucide-react'
 import PricingSection from '../components/PricingSection'
 
@@ -38,55 +42,6 @@ function useScrollReveal() {
   }, [])
 
   return ref
-}
-
-/* ───────── Animated counter ───────── */
-
-function Counter({ end, suffix = '' }: { end: number; suffix?: string }) {
-  const [count, setCount] = useState(0)
-  const [started, setStarted] = useState(false)
-  const ref = useRef<HTMLSpanElement>(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting && !started) {
-          setStarted(true)
-          obs.disconnect()
-        }
-      },
-      { threshold: 0.5 },
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [started])
-
-  useEffect(() => {
-    if (!started) return
-    const duration = 2000
-    const steps = 60
-    const inc = end / steps
-    let cur = 0
-    const t = setInterval(() => {
-      cur += inc
-      if (cur >= end) {
-        setCount(end)
-        clearInterval(t)
-      } else {
-        setCount(Math.floor(cur))
-      }
-    }, duration / steps)
-    return () => clearInterval(t)
-  }, [started, end])
-
-  return (
-    <span ref={ref}>
-      {count.toLocaleString('pt-BR')}
-      {suffix}
-    </span>
-  )
 }
 
 /* ───────── Data ───────── */
@@ -227,14 +182,11 @@ export default function Home() {
 
       {/* ── Hero ───────────────────────────────────────── */}
       <section className="relative pt-28 pb-20 lg:pt-36 lg:pb-28 overflow-hidden min-h-[92vh] flex items-center">
-        {/* Animated blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-primary/10 blur-[120px] lp-float" />
           <div className="absolute top-1/2 -left-40 w-[400px] h-[400px] rounded-full bg-secondary/10 blur-[120px] lp-float-slow" />
-          <div className="absolute -bottom-20 right-1/4 w-[350px] h-[350px] rounded-full bg-accent/8 blur-[120px] lp-float-alt" />
         </div>
 
-        {/* Dot grid */}
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
           style={{
@@ -244,61 +196,126 @@ export default function Home() {
         />
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Badge */}
-            <div className="hero-enter hero-enter-d1 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8 backdrop-blur-sm">
+          {/* Top badge + heading */}
+          <div className="text-center mb-12 hero-enter hero-enter-d1">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm mb-6">
               <Sparkles size={16} className="text-primary animate-pulse" />
-              <span className="text-sm font-semibold text-primary">Controle total do seu veículo</span>
+              <span className="text-sm font-semibold text-primary">Gestão completa de veículos</span>
             </div>
-
-            {/* Heading */}
-            <h1 className="hero-enter hero-enter-d2 text-5xl sm:text-6xl lg:text-7xl font-black mb-6 leading-[1.1]">
-              Histórico completo,
-              <br />
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1]">
+              Do carro pessoal à frota,{' '}
+              <br className="hidden sm:block" />
               <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent lp-gradient-text bg-[length:200%_auto]">
-                revenda valorizada
+                tudo sob controle
               </span>
             </h1>
+          </div>
 
-            {/* Subtitle */}
-            <p className="hero-enter hero-enter-d3 text-lg sm:text-xl text-base-content/60 mb-12 max-w-2xl mx-auto leading-relaxed">
-              Registre manutenções, controle despesas e gere relatórios profissionais.
-              Valorize seu veículo na revenda com histórico completo e organizado.
-            </p>
+          {/* Two cards */}
+          <div className="hero-enter hero-enter-d2 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-6xl mx-auto">
+            {/* Individual card */}
+            <div className="group relative p-8 sm:p-10 rounded-3xl bg-base-100 border border-base-300/50 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 flex flex-col">
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative flex flex-col flex-1">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                    <Car size={24} className="text-primary" />
+                  </div>
+                  <span className="text-xs font-bold uppercase tracking-widest text-primary/70">Proprietário</span>
+                </div>
 
-            {/* CTA */}
-            <div className="hero-enter hero-enter-d4 flex flex-col sm:flex-row gap-4 justify-center items-center mb-20">
-              <button
-                onClick={() => navigate('/login')}
-                className="btn btn-primary btn-lg gap-2 shadow-2xl shadow-primary/30 hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 group"
-              >
-                Começar agora
-              </button>
-              <a href="#planos" className="btn btn-ghost btn-lg gap-2 hover:bg-base-content/5">
-                Ver planos
-                <ChevronDown size={18} />
-              </a>
+                <h2 className="text-3xl sm:text-4xl font-black mb-4 leading-tight">
+                  Histórico completo,
+                  <br />
+                  <span className="text-primary">revenda valorizada</span>
+                </h2>
+
+                <p className="text-base-content/60 mb-8 leading-relaxed">
+                  Registre manutenções, controle despesas e gere relatórios profissionais.
+                  Valorize seu veículo na revenda com histórico completo.
+                </p>
+
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="flex items-center gap-2 text-sm text-base-content/70">
+                    <TrendingUp size={16} className="text-primary" />
+                    Valorize na revenda
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-base-content/70">
+                    <FileText size={16} className="text-primary" />
+                    Relatórios PDF
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-base-content/70">
+                    <Bell size={16} className="text-primary" />
+                    Lembretes
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-base-content/70">
+                    <BarChart3 size={16} className="text-primary" />
+                    Dashboards
+                  </div>
+                </div>
+
+                <div className="mt-auto">
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="btn btn-primary btn-lg w-full gap-2 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
+                  >
+                    Começar agora
+                    <ArrowRight size={18} />
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {/* Stats */}
-            <div className="hero-enter hero-enter-d5 grid grid-cols-3 gap-6 sm:gap-12 max-w-2xl mx-auto pt-10 border-t border-base-content/10">
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-black text-primary mb-1">
-                  <Counter end={5200} suffix="+" />
+            {/* Fleet card */}
+            <div className="group relative p-8 sm:p-10 rounded-3xl bg-base-100 border border-base-300/50 hover:border-secondary/40 hover:shadow-2xl hover:shadow-secondary/10 transition-all duration-500 flex flex-col">
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative flex flex-col flex-1">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/5 flex items-center justify-center">
+                    <Truck size={24} className="text-secondary" />
+                  </div>
+                  <span className="text-xs font-bold uppercase tracking-widest text-secondary/70">Gestor de Frotas</span>
                 </div>
-                <div className="text-xs sm:text-sm text-base-content/50 font-medium">Usuários ativos</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-black text-secondary mb-1">
-                  <Counter end={12800} suffix="+" />
+
+                <h2 className="text-3xl sm:text-4xl font-black mb-4 leading-tight">
+                  Sua frota sob
+                  <br />
+                  <span className="text-secondary">controle total</span>
+                </h2>
+
+                <p className="text-base-content/60 mb-8 leading-relaxed">
+                  Acompanhe consumo de combustível, custos por km e manutenções preventivas
+                  de todos os veículos da sua frota.
+                </p>
+
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="flex items-center gap-2 text-sm text-base-content/70">
+                    <Fuel size={16} className="text-secondary" />
+                    Consumo por veículo
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-base-content/70">
+                    <DollarSign size={16} className="text-secondary" />
+                    Custo por km
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-base-content/70">
+                    <Users size={16} className="text-secondary" />
+                    Multi-motoristas
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-base-content/70">
+                    <BarChart3 size={16} className="text-secondary" />
+                    Métricas da frota
+                  </div>
                 </div>
-                <div className="text-xs sm:text-sm text-base-content/50 font-medium">Veículos cadastrados</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-black text-accent mb-1">
-                  <Counter end={48000} suffix="+" />
+
+                <div className="mt-auto">
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="btn btn-secondary btn-lg w-full gap-2 shadow-lg shadow-secondary/20 hover:shadow-xl hover:shadow-secondary/30 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
+                  >
+                    Gerenciar frota
+                    <ArrowRight size={18} />
+                  </button>
                 </div>
-                <div className="text-xs sm:text-sm text-base-content/50 font-medium">Manutenções registradas</div>
               </div>
             </div>
           </div>

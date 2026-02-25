@@ -1,20 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
 type Theme =
-  | 'abyss'
-  | 'emerald'
-  | 'cupcake'
-  | 'garden'
-  | 'forest'
-  | 'fantasy'
-  | 'black'
-  | 'luxury'
-  | 'dracula'
-  | 'autumn'
-  | 'lemonade'
-  | 'coffee'
-  | 'dim'
-  | 'nord'
+  | 'light'
+  | 'dark'
 
 interface ThemeContextType {
   theme: Theme
@@ -25,24 +13,12 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 const THEMES: Theme[] = [
-  'abyss',
-  'emerald',
-  'cupcake',
-  'garden',
-  'forest',
-  'fantasy',
-  'black',
-  'luxury',
-  'dracula',
-  'autumn',
-  'lemonade',
-  'coffee',
-  'dim',
-  'nord',
+  'light',
+  'dark',
 ]
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('abyss')
+  const [theme, setThemeState] = useState<Theme>('light')
 
   useEffect(() => {
     // Carregar tema salvo
