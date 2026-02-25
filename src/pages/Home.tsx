@@ -18,8 +18,11 @@ import {
   DollarSign,
   Users,
   ArrowRight,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import PricingSection from '../components/PricingSection'
+import { useTheme } from '../contexts/ThemeContext'
 
 /* ───────── Hooks ───────── */
 
@@ -125,6 +128,7 @@ const testimonials = [
 
 export default function Home() {
   const navigate = useNavigate()
+  const { theme, setTheme } = useTheme()
   const pageRef = useScrollReveal()
   const [navSolid, setNavSolid] = useState(false)
 
@@ -163,6 +167,15 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-3">
+              <label className="swap swap-rotate btn btn-ghost btn-sm btn-circle">
+                <input
+                  type="checkbox"
+                  checked={theme === 'dark'}
+                  onChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                />
+                <Sun size={18} className="swap-off" />
+                <Moon size={18} className="swap-on" />
+              </label>
               <button
                 onClick={() => navigate('/login')}
                 className="text-sm font-medium text-base-content/70 hover:text-primary transition-colors px-4 py-2"

@@ -5,12 +5,12 @@
 @tailwind utilities;
 
 @plugin "daisyui" {
-  themes: 
+  themes: dark --default
 }
 
 @plugin "daisyui/theme" {
   name: "dark";
-  default: false;
+  default: true;
   prefersdark: false;
   color-scheme: "dark";
   

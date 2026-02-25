@@ -21,12 +21,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('light')
 
   useEffect(() => {
-    // Carregar tema salvo
     const saved = localStorage.getItem('theme') as Theme | null
-    if (saved && THEMES.includes(saved)) {
-      setThemeState(saved)
-      document.documentElement.setAttribute('data-theme', saved)
-    }
+    const initial = saved && THEMES.includes(saved) ? saved : 'dark'
+    setThemeState(initial)
+    document.documentElement.setAttribute('data-theme', initial)
   }, [])
 
   const setTheme = (newTheme: Theme) => {
