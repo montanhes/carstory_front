@@ -269,7 +269,7 @@ export default function Profile() {
     <div>
       <h2 className="text-2xl md:text-3xl font-bold text-base-content mb-6">Meu Perfil</h2>
 
-      <div role="tablist" className="tabs tabs-box">
+      <div role="tablist" className="tabs tabs-border">
         {/* Aba: Minha Conta */}
         <input
           type="radio"
