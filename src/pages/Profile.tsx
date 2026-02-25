@@ -269,322 +269,322 @@ export default function Profile() {
     <div>
       <h2 className="text-2xl md:text-3xl font-bold text-base-content mb-6">Meu Perfil</h2>
 
-      {/* Abas */}
-      <div role="tablist" className="tabs tabs-bordered mb-6">
-        <button
+      <div role="tablist" className="tabs tabs-box">
+        {/* Aba: Minha Conta */}
+        <input
+          type="radio"
+          name="profile_tabs"
           role="tab"
-          className={`tab ${activeTab === 'account' ? 'tab-active' : ''}`}
-          onClick={() => setActiveTab('account')}
-        >
-          Minha Conta
-        </button>
-        <button
-          role="tab"
-          className={`tab ${activeTab === 'payments' ? 'tab-active' : ''}`}
-          onClick={() => setActiveTab('payments')}
-        >
-          Pagamentos
-        </button>
-        <button
-          role="tab"
-          className={`tab ${activeTab === 'preferences' ? 'tab-active' : ''}`}
-          onClick={() => setActiveTab('preferences')}
-        >
-          Preferências
-        </button>
-      </div>
-
-      {/* Aba: Minha Conta */}
-      {activeTab === 'account' && (
-        <>
-          {/* Transferências Recebidas */}
-          {receivedTransfers.length > 0 && (
-            <div className="card bg-warning/10 border border-warning/40 shadow-md max-w-2xl mb-6">
-              <div className="card-body p-4 md:p-6">
-                <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
-                  <span className="badge badge-warning">{receivedTransfers.length}</span>
-                  Transferências Pendentes
-                </h3>
-                <p className="text-sm text-base-content/60 mb-4">
-                  Você tem solicitações de transferência de veículo aguardando sua resposta.
-                </p>
-                <div className="space-y-3">
-                  {receivedTransfers.map(t => (
-                    <div key={t.id} className="flex flex-wrap items-center gap-3 p-3 bg-base-200 rounded-lg border border-base-300">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{t.vehicle_name}</p>
-                        <p className="text-xs text-base-content/60">
-                          De <strong>{t.sender_name}</strong> · {new Date(t.created_at).toLocaleDateString('pt-BR')}
-                        </p>
+          className="tab"
+          aria-label="Minha Conta"
+          defaultChecked
+        />
+        <div role="tabpanel" className="tab-content border-base-300 p-4 md:p-6">
+          <div className="space-y-6">
+            {/* Transferências Recebidas */}
+            {receivedTransfers.length > 0 && (
+              <div className="card bg-warning/10 border border-warning/40 shadow-md max-w-2xl">
+                <div className="card-body p-4 md:p-6">
+                  <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
+                    <span className="badge badge-warning">{receivedTransfers.length}</span>
+                    Transferências Pendentes
+                  </h3>
+                  <p className="text-sm text-base-content/60 mb-4">
+                    Você tem solicitações de transferência de veículo aguardando sua resposta.
+                  </p>
+                  <div className="space-y-3">
+                    {receivedTransfers.map(t => (
+                      <div key={t.id} className="flex flex-wrap items-center gap-3 p-3 bg-base-200 rounded-lg border border-base-300">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{t.vehicle_name}</p>
+                          <p className="text-xs text-base-content/60">
+                            De <strong>{t.sender_name}</strong> · {new Date(t.created_at).toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={() => handleRespondTransfer(t.id, 'rejected')}
+                            disabled={respondingId === t.id}
+                            className="btn btn-outline btn-error btn-xs"
+                          >
+                            {respondingId === t.id ? <span className="loading loading-spinner loading-xs" /> : 'Recusar'}
+                          </button>
+                          <button
+                            onClick={() => handleRespondTransfer(t.id, 'accepted')}
+                            disabled={respondingId === t.id}
+                            className="btn btn-success btn-xs"
+                          >
+                            {respondingId === t.id ? <span className="loading loading-spinner loading-xs" /> : 'Aceitar'}
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex gap-2 shrink-0">
-                        <button
-                          onClick={() => handleRespondTransfer(t.id, 'rejected')}
-                          disabled={respondingId === t.id}
-                          className="btn btn-outline btn-error btn-xs"
-                        >
-                          {respondingId === t.id ? <span className="loading loading-spinner loading-xs" /> : 'Recusar'}
-                        </button>
-                        <button
-                          onClick={() => handleRespondTransfer(t.id, 'accepted')}
-                          disabled={respondingId === t.id}
-                          className="btn btn-success btn-xs"
-                        >
-                          {respondingId === t.id ? <span className="loading loading-spinner loading-xs" /> : 'Aceitar'}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Código de Transferência */}
-          {user?.personal_code && (
-            <div className="card bg-base-200 shadow-md border border-base-300 max-w-2xl mb-6">
-              <div className="card-body p-4 md:p-6">
-                <h3 className="text-lg font-semibold mb-1">Código de Transferência</h3>
-                <p className="text-sm text-base-content/60 mb-4">
-                  Compartilhe este código para transferir dados entre contas ou dispositivos.
-                </p>
-                <div className="flex items-center gap-3">
-                  <span className="font-mono text-xl md:text-2xl tracking-widest font-bold text-base-content">
-                    {formatPersonalCode(user.personal_code)}
-                  </span>
-                  <button
-                    onClick={handleCopyCode}
-                    className="btn btn-ghost btn-sm"
-                    title="Copiar código"
-                  >
-                    {copied ? <Check size={16} className="text-success" /> : <Copy size={16} />}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Formulário de Edição */}
-          <div className="card bg-base-200 shadow-md border border-base-300 max-w-2xl">
-            <div className="card-body p-4 md:p-6">
-              <h3 className="text-lg font-semibold mb-4">Informações Pessoais</h3>
-
-              <div className="space-y-4">
-                {/* Nome */}
-                <div className="form-control">
-                  <label className="label py-1">
-                    <span className="label-text">Nome *</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Seu nome"
-                    className="input input-bordered input-sm md:input-md w-full"
-                    required
-                  />
-                </div>
-
-                {/* Email */}
-                <div className="form-control">
-                  <label className="label py-1">
-                    <span className="label-text">Email *</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="seu@email.com"
-                    className="input input-bordered input-sm md:input-md w-full"
-                    required
-                    readOnly
-                  />
-                </div>
-
-                {/* Divider */}
-                <div className="divider my-2">Alterar Senha (Opcional)</div>
-
-                {/* Nova Senha */}
-                <div className="form-control">
-                  <label className="label py-1">
-                    <span className="label-text">Nova Senha</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Deixe em branco para não alterar"
-                    className="input input-bordered input-sm md:input-md w-full"
-                  />
-                </div>
-
-                {/* Confirmar Senha */}
-                <div className="form-control">
-                  <label className="label py-1">
-                    <span className="label-text">Confirmar Senha</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="password_confirmation"
-                    value={formData.password_confirmation}
-                    onChange={handleChange}
-                    placeholder="Confirme a nova senha"
-                    className="input input-bordered input-sm md:input-md w-full"
-                  />
-                </div>
-
-                {/* Botões */}
-                <div className="flex gap-2 pt-4 border-t border-base-300">
-                  <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="btn btn-primary btn-sm md:btn-md flex-1"
-                  >
-                    {saving ? <span className="loading loading-spinner loading-xs"></span> : 'Salvar Alterações'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Aba: Pagamentos */}
-      {activeTab === 'payments' && (
-        <div className="card bg-base-200 shadow-md border border-base-300 max-w-2xl">
-          <div className="card-body p-4 md:p-6">
-            <h3 className="text-lg font-semibold mb-4">Histórico de Pagamentos</h3>
-
-            {paymentsLoading ? (
-              <div className="flex justify-center py-8">
-                <span className="loading loading-spinner loading-md"></span>
-              </div>
-            ) : !payments || payments.data.length === 0 ? (
-              <p className="text-sm text-base-content/60 text-center py-4">
-                Nenhum pagamento encontrado.
-              </p>
-            ) : (
-              <>
-                {/* Mobile: cards empilhados */}
-                <div className="space-y-3 md:hidden">
-                  {payments.data.map((payment) => (
-                    <div key={payment.id} className="p-3 bg-base-100 rounded-lg border border-base-300">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium text-sm">{payment.plan_label} — {payment.billing_cycle_label}</span>
-                        <span className={`badge badge-sm ${getStatusBadgeClass(payment.status)}`}>
-                          {payment.status_label}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-xs text-base-content/60">
-                        <span>{new Date(payment.created_at).toLocaleDateString('pt-BR')}</span>
-                        <span className="font-semibold text-base-content">{payment.formatted_amount}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Desktop: tabela */}
-                <div className="hidden md:block overflow-x-auto">
-                  <table className="table table-sm">
-                    <thead>
-                      <tr>
-                        <th>Data</th>
-                        <th>Plano</th>
-                        <th>Valor</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {payments.data.map((payment) => (
-                        <tr key={payment.id}>
-                          <td className="text-sm">{new Date(payment.created_at).toLocaleDateString('pt-BR')}</td>
-                          <td className="text-sm font-medium">{payment.plan_label} — {payment.billing_cycle_label}</td>
-                          <td className="text-sm">{payment.formatted_amount}</td>
-                          <td>
-                            <span className={`badge badge-sm ${getStatusBadgeClass(payment.status)}`}>
-                              {payment.status_label}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Paginação */}
-                {payments.last_page > 1 && (
-                  <div className="flex justify-center gap-2 mt-4">
-                    <button
-                      onClick={() => setPaymentsPage((p) => Math.max(1, p - 1))}
-                      disabled={payments.current_page <= 1}
-                      className="btn btn-sm btn-ghost"
-                    >
-                      Anterior
-                    </button>
-                    <span className="btn btn-sm btn-ghost no-animation">
-                      {payments.current_page} / {payments.last_page}
+            {/* Código de Transferência */}
+            {user?.personal_code && (
+              <div className="card bg-base-200 shadow-md border border-base-300 max-w-2xl">
+                <div className="card-body p-4 md:p-6">
+                  <h3 className="text-lg font-semibold mb-1">Código de Transferência</h3>
+                  <p className="text-sm text-base-content/60 mb-4">
+                    Compartilhe este código para transferir dados entre contas ou dispositivos.
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xl md:text-2xl tracking-widest font-bold text-base-content">
+                      {formatPersonalCode(user.personal_code)}
                     </span>
                     <button
-                      onClick={() => setPaymentsPage((p) => Math.min(payments!.last_page, p + 1))}
-                      disabled={payments.current_page >= payments.last_page}
-                      className="btn btn-sm btn-ghost"
+                      onClick={handleCopyCode}
+                      className="btn btn-ghost btn-sm"
+                      title="Copiar código"
                     >
-                      Próxima
+                      {copied ? <Check size={16} className="text-success" /> : <Copy size={16} />}
                     </button>
                   </div>
-                )}
-              </>
+                </div>
+              </div>
             )}
-          </div>
-        </div>
-      )}
 
-      {/* Aba: Preferências */}
-      {activeTab === 'preferences' && (
-        <>
-          {/* Preferências */}
-          <div className="card bg-base-200 shadow-md border border-base-300 max-w-2xl mb-6">
-            <div className="card-body p-4 md:p-6">
-              <h3 className="text-lg font-semibold mb-4">Preferências</h3>
-              <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text">Tema</span>
-                </label>
-                <select
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value as any)}
-                  className="select select-bordered select-sm md:select-md w-full"
-                >
-                  {themes.map((t) => (
-                    <option key={t} value={t}>
-                      {t.charAt(0).toUpperCase() + t.slice(1)}
-                    </option>
-                  ))}
-                </select>
+            {/* Formulário de Edição */}
+            <div className="card bg-base-200 shadow-md border border-base-300 max-w-2xl">
+              <div className="card-body p-4 md:p-6">
+                <h3 className="text-lg font-semibold mb-4">Informações Pessoais</h3>
+
+                <div className="space-y-4">
+                  {/* Nome */}
+                  <div className="form-control">
+                    <label className="label py-1">
+                      <span className="label-text">Nome *</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Seu nome"
+                      className="input input-bordered input-sm md:input-md w-full"
+                      required
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div className="form-control">
+                    <label className="label py-1">
+                      <span className="label-text">Email *</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="seu@email.com"
+                      className="input input-bordered input-sm md:input-md w-full"
+                      required
+                      readOnly
+                    />
+                  </div>
+
+                  {/* Divider */}
+                  <div className="divider my-2">Alterar Senha (Opcional)</div>
+
+                  {/* Nova Senha */}
+                  <div className="form-control">
+                    <label className="label py-1">
+                      <span className="label-text">Nova Senha</span>
+                    </label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Deixe em branco para não alterar"
+                      className="input input-bordered input-sm md:input-md w-full"
+                    />
+                  </div>
+
+                  {/* Confirmar Senha */}
+                  <div className="form-control">
+                    <label className="label py-1">
+                      <span className="label-text">Confirmar Senha</span>
+                    </label>
+                    <input
+                      type="password"
+                      name="password_confirmation"
+                      value={formData.password_confirmation}
+                      onChange={handleChange}
+                      placeholder="Confirme a nova senha"
+                      className="input input-bordered input-sm md:input-md w-full"
+                    />
+                  </div>
+
+                  {/* Botões */}
+                  <div className="flex gap-2 pt-4 border-t border-base-300">
+                    <button
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="btn btn-primary btn-sm md:btn-md flex-1"
+                    >
+                      {saving ? <span className="loading loading-spinner loading-xs"></span> : 'Salvar Alterações'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Zona de Perigo */}
-          <div className="card bg-error/10 border-2 border-error shadow-md max-w-2xl">
+        {/* Aba: Pagamentos */}
+        <input
+          type="radio"
+          name="profile_tabs"
+          role="tab"
+          className="tab"
+          aria-label="Pagamentos"
+          onChange={() => setActiveTab('payments')}
+        />
+        <div role="tabpanel" className="tab-content border-base-300 p-4 md:p-6">
+          <div className="card bg-base-200 shadow-md border border-base-300 max-w-2xl">
             <div className="card-body p-4 md:p-6">
-              <h3 className="text-lg font-semibold text-error mb-2">Zona de Perigo</h3>
-              <p className="text-sm text-base-content/70 mb-4">
-                Desativar sua conta é uma ação irreversível. Todos os seus dados serão mantidos mas você não poderá mais acessar o sistema.
-              </p>
-              <button
-                onClick={handleDisableAccount}
-                className="btn btn-outline btn-error btn-sm md:btn-md w-full sm:w-auto"
-              >
-                Desativar Conta
-              </button>
+              <h3 className="text-lg font-semibold mb-4">Histórico de Pagamentos</h3>
+
+              {paymentsLoading ? (
+                <div className="flex justify-center py-8">
+                  <span className="loading loading-spinner loading-md"></span>
+                </div>
+              ) : !payments || payments.data.length === 0 ? (
+                <p className="text-sm text-base-content/60 text-center py-4">
+                  Nenhum pagamento encontrado.
+                </p>
+              ) : (
+                <>
+                  {/* Mobile: cards empilhados */}
+                  <div className="space-y-3 md:hidden">
+                    {payments.data.map((payment) => (
+                      <div key={payment.id} className="p-3 bg-base-100 rounded-lg border border-base-300">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium text-sm">{payment.plan_label} — {payment.billing_cycle_label}</span>
+                          <span className={`badge badge-sm ${getStatusBadgeClass(payment.status)}`}>
+                            {payment.status_label}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-base-content/60">
+                          <span>{new Date(payment.created_at).toLocaleDateString('pt-BR')}</span>
+                          <span className="font-semibold text-base-content">{payment.formatted_amount}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop: tabela */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="table table-sm">
+                      <thead>
+                        <tr>
+                          <th>Data</th>
+                          <th>Plano</th>
+                          <th>Valor</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {payments.data.map((payment) => (
+                          <tr key={payment.id}>
+                            <td className="text-sm">{new Date(payment.created_at).toLocaleDateString('pt-BR')}</td>
+                            <td className="text-sm font-medium">{payment.plan_label} — {payment.billing_cycle_label}</td>
+                            <td className="text-sm">{payment.formatted_amount}</td>
+                            <td>
+                              <span className={`badge badge-sm ${getStatusBadgeClass(payment.status)}`}>
+                                {payment.status_label}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Paginação */}
+                  {payments.last_page > 1 && (
+                    <div className="flex justify-center gap-2 mt-4">
+                      <button
+                        onClick={() => setPaymentsPage((p) => Math.max(1, p - 1))}
+                        disabled={payments.current_page <= 1}
+                        className="btn btn-sm btn-ghost"
+                      >
+                        Anterior
+                      </button>
+                      <span className="btn btn-sm btn-ghost no-animation">
+                        {payments.current_page} / {payments.last_page}
+                      </span>
+                      <button
+                        onClick={() => setPaymentsPage((p) => Math.min(payments!.last_page, p + 1))}
+                        disabled={payments.current_page >= payments.last_page}
+                        className="btn btn-sm btn-ghost"
+                      >
+                        Próxima
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
-        </>
-      )}
+        </div>
+
+        {/* Aba: Preferências */}
+        <input
+          type="radio"
+          name="profile_tabs"
+          role="tab"
+          className="tab"
+          aria-label="Preferências"
+        />
+        <div role="tabpanel" className="tab-content border-base-300 p-4 md:p-6">
+          <div className="space-y-6">
+            {/* Preferências */}
+            <div className="card bg-base-200 shadow-md border border-base-300 max-w-2xl">
+              <div className="card-body p-4 md:p-6">
+                <h3 className="text-lg font-semibold mb-4">Preferências</h3>
+                <div className="form-control">
+                  <label className="label py-1">
+                    <span className="label-text">Tema</span>
+                  </label>
+                  <select
+                    value={theme}
+                    onChange={(e) => setTheme(e.target.value as any)}
+                    className="select select-bordered select-sm md:select-md w-full"
+                  >
+                    {themes.map((t) => (
+                      <option key={t} value={t}>
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Zona de Perigo */}
+            <div className="card bg-error/10 border-2 border-error shadow-md max-w-2xl">
+              <div className="card-body p-4 md:p-6">
+                <h3 className="text-lg font-semibold text-error mb-2">Zona de Perigo</h3>
+                <p className="text-sm text-base-content/70 mb-4">
+                  Desativar sua conta é uma ação irreversível. Todos os seus dados serão mantidos mas você não poderá mais acessar o sistema.
+                </p>
+                <button
+                  onClick={handleDisableAccount}
+                  className="btn btn-outline btn-error btn-sm md:btn-md w-full sm:w-auto"
+                >
+                  Desativar Conta
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Dialogs */}
       <ConfirmDialog
