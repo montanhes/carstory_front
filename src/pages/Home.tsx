@@ -88,7 +88,7 @@ const testimonials = [
   {
     name: 'Carlos M.',
     role: 'Entusiasta automotivo',
-    text: 'Vendi meu carro por 15% a mais do que a tabela FIPE graças ao relatório completo do CarStory.',
+    text: 'Vendi meu carro por 15% a mais do que a tabela FIPE graças ao relatório completo do Moviu.',
     stars: 5,
   },
   {
@@ -268,7 +268,7 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              CarStory
+              Moviu
             </span>
 
             <div className="hidden md:flex items-center gap-8">
@@ -539,7 +539,7 @@ export default function Home() {
             </div>
             <h2 className="text-4xl sm:text-5xl font-bold mb-4">O que nossos usuários dizem</h2>
             <p className="text-lg text-base-content/60 max-w-2xl mx-auto">
-              Milhares de motoristas já confiam no CarStory
+              Milhares de motoristas já confiam no Moviu
             </p>
           </div>
 
@@ -626,7 +626,7 @@ export default function Home() {
           <div data-anim="footer-container" className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
             <div data-anim="footer-col" className="md:col-span-1">
               <span className="text-2xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                CarStory
+                Moviu
               </span>
               <p className="text-sm text-base-content/50 mt-3 leading-relaxed max-w-[240px]">
                 Gestão inteligente de veículos para valorizar seu patrimônio.
@@ -663,7 +663,7 @@ export default function Home() {
 
           <div className="pt-8 border-t border-base-300/50 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-base-content/40">
-              © 2026 CarStory. Todos os direitos reservados.
+              © 2026 Moviu. Todos os direitos reservados.
             </p>
             <div className="flex items-center gap-5">
               <a href="#" className="text-base-content/40 hover:text-primary transition-colors" aria-label="Facebook">

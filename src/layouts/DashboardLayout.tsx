@@ -87,7 +87,7 @@ export default function DashboardLayout() {
             />
           </svg>
         </button>
-        <span className="text-xl font-bold text-base-content ml-2 lg:ml-0">CarStory</span>
+        <span className="text-xl font-bold text-base-content ml-2 lg:ml-0">Moviu</span>
 
         {/* User menu — extremo direito */}
         <div className="ml-auto dropdown dropdown-end">

@@ -1,6 +1,6 @@
-# 📊 CarStory API - Documentação de Relatórios
+# 📊 Moviu API - Documentação de Relatórios
 
-Documentação completa dos endpoints de relatórios da CarStory API para integração com frontend React + Chart.js.
+Documentação completa dos endpoints de relatórios da Moviu API para integração com frontend React + Chart.js.
 
 ## 🔐 Autenticação
 

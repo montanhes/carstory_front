@@ -1,8 +1,8 @@
- Plano de Implementação: Sistema de Relatórios CarStory API
+ Plano de Implementação: Sistema de Relatórios Moviu API
 
  Contexto
 
- O usuário solicitou a implementação de um sistema completo de relatórios para a API CarStory em 3 fases de priorização (Essenciais, Análise, Avançados). O sistema deve fornecer endpoints REST que retornam dados formatados para serem consumidos por um frontend React com Chart.js.
+ O usuário solicitou a implementação de um sistema completo de relatórios para a API Moviu em 3 fases de priorização (Essenciais, Análise, Avançados). O sistema deve fornecer endpoints REST que retornam dados formatados para serem consumidos por um frontend React com Chart.js.
 
  Problema a resolver:
  - Falta de insights sobre despesas de veículos

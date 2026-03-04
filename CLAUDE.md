@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-CarStory is a vehicle management and maintenance tracking frontend application built with React 19, TypeScript, and Vite. It connects to a Laravel backend with Sanctum authentication.
+Moviu is a vehicle management and maintenance tracking frontend application built with React 19, TypeScript, and Vite. It connects to a Laravel backend with Sanctum authentication.
 
 ## Development Commands
 
@@ -59,7 +59,7 @@ All API calls go through `services/api.ts` which exports:
 ## Theme System
 
 The app uses a React Context-based theme system that:
-- Stores selected theme in localStorage (`carstory_theme`)
+- Stores selected theme in localStorage (`moviu_theme`)
 - Loads saved theme on app startup
 - Applies theme via `data-theme` attribute on `<html>` element
 - Provides theme selector in the sidebar (DashboardLayout)

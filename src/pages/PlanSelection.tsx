@@ -97,7 +97,7 @@ export default function PlanSelection() {
       <div className="border-b border-base-300/50 bg-base-100/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <span className="text-2xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            CarStory
+            Moviu
           </span>
           {user && (
             <span className="text-sm text-base-content/50">
