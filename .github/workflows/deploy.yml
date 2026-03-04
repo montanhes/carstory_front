@@ -37,12 +37,12 @@ jobs:
 
       - name: Deploy to Hostoo
         run: |
-          ssh -i ~/.ssh/id_hostoo ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "mkdir -p ~/frontend_tmp"
-          scp -i ~/.ssh/id_hostoo -r dist/* ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:~/frontend_tmp/
+          ssh -i ~/.ssh/id_hostoo ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "rm -rf ~/frontend_tmp && mkdir -p ~/frontend_tmp"
+          scp -i ~/.ssh/id_hostoo -r dist/. ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:~/frontend_tmp/
           ssh -i ~/.ssh/id_hostoo ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "
             cd /home/${{ secrets.HOSTOO_USER }}/public_html && \
-            rm -rf index.html assets vite.svg 2>/dev/null || true && \
-            mv ~/frontend_tmp/* . && \
+            find . -maxdepth 1 -mindepth 1 -not -name '.*' -exec rm -rf {} + 2>/dev/null || true && \
+            cp -r ~/frontend_tmp/. . && \
             rm -rf ~/frontend_tmp
           "
 
