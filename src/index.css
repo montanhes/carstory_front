@@ -8,104 +8,83 @@
   themes: dark --default
 }
 
-@plugin "daisyui/theme" {
-  name: "dark";
-  default: true;
-  prefersdark: false;
-  color-scheme: "dark";
-  
-  /* Aumentei a luminosidade (L) para deixar o fundo menos "pesado" */
-  --color-base-100: oklch(25% 0.015 285.823); /* De 14% para 25% */
-  --color-base-200: oklch(30% 0.015 285.885); /* De 21% para 30% */
-  --color-base-300: oklch(35% 0.015 286.033); /* De 27% para 35% */
-  
-  /* O texto (content) precisa continuar bem claro para manter o contraste */
-  --color-base-content: oklch(96% 0.001 286.375);
-  
-  --color-primary: oklch(79% 0.184 86.047);
-  --color-primary-content: oklch(20% 0.026 102.212); /* Ajustado para contraste no fundo claro */
-  
-  --color-secondary: oklch(64% 0.246 16.439);
-  --color-secondary-content: oklch(96% 0.015 12.422);
-  
-  --color-accent: oklch(79% 0.184 86.047);
-  --color-accent-content: oklch(20% 0.026 102.212);
-  
-  --color-neutral: oklch(40% 0.02 285.786);
-  --color-neutral-content: oklch(98% 0 0);
-  
-  --color-info: oklch(62% 0.214 259.815);
-  --color-info-content: oklch(97% 0.014 254.604);
-  
-  --color-success: oklch(70% 0.14 182.503);
-  --color-success-content: oklch(98% 0.014 180.72);
-  
-  --color-warning: oklch(79% 0.184 86.047);
-  --color-warning-content: oklch(20% 0.026 102.212);
-  
-  --color-error: oklch(63% 0.237 25.331);
-  --color-error-content: oklch(97% 0.013 17.38);
-
-  --radius-selector: 0.5rem;
-  --radius-field: 0.5rem;
-  --radius-box: 0.5rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 1;
-  --noise: 1;
-}
-
+/* TEMA LIGHT - Refinado e Equilibrado */
 @plugin "daisyui/theme" {
   name: "light";
-  default: false;
+  default: true;
   prefersdark: false;
   color-scheme: "light";
+  
+  /* Reduzindo a "claridade exagerada" - Tons de cinza seda esverdeado */
+  --color-base-100: oklch(96% 0.008 150); /* Fundo principal levemente mais denso */
+  --color-base-200: oklch(92% 0.015 150); /* Superfícies secundárias com mais corpo */
+  --color-base-300: oklch(87% 0.02 150);  /* Bordas e divisores bem definidos */
+  
+  /* Texto no seu Verde Musgo Profundo */
+  --color-base-content: oklch(27% 0.072 132.109);
 
-  /* Bases claras: quanto maior a numeração (100 -> 300), mais "cinza" fica */
-  --color-base-100: oklch(98% 0.005 285.823); /* Fundo principal quase branco */
-  --color-base-200: oklch(94% 0.01 285.885);  /* Fundo secundário/cards */
-  --color-base-300: oklch(89% 0.01 286.033);  /* Bordas e divisores */
-  
-  /* Texto escuro para alto contraste no fundo claro */
-  --color-base-content: oklch(25% 0.02 285.786); 
+  /* Primário: Seu Verde Vibrante */
+  --color-primary: oklch(79% 0.209 151.711);
+  --color-primary-content: oklch(20% 0.07 132);
 
-  /* Cores de destaque: mantive o matiz, mas ajustei a croma para ficarem vivas no fundo claro */
-  --color-primary: oklch(65% 0.184 86.047); 
-  --color-primary-content: oklch(98% 0.026 102.212);
-  
-  --color-secondary: oklch(55% 0.246 16.439);
-  --color-secondary-content: oklch(98% 0.015 12.422);
-  
-  --color-accent: oklch(65% 0.184 86.047);
-  --color-accent-content: oklch(98% 0.026 102.212);
-  
-  /* Tons neutros para estados desabilitados ou bordas */
-  --color-neutral: oklch(35% 0.02 285.786);
-  --color-neutral-content: oklch(98% 0 0);
-  
-  /* Cores de Feedback (ajustadas para visibilidade em fundo branco) */
-  --color-info: oklch(55% 0.214 259.815);
-  --color-info-content: oklch(98% 0.014 254.604);
-  
-  --color-success: oklch(50% 0.14 182.503);
-  --color-success-content: oklch(98% 0.014 180.72);
-  
-  --color-warning: oklch(65% 0.184 86.047);
-  --color-warning-content: oklch(20% 0.026 102.212);
-  
-  --color-error: oklch(55% 0.237 25.331);
-  --color-error-content: oklch(98% 0.013 17.38);
+  /* Secundário: Verde Teal (Elegante e sério) */
+  --color-secondary: oklch(60% 0.08 175);
+  --color-secondary-content: oklch(98% 0.01 175);
 
-  /* Mantive seus arredondamentos originais */
-  --radius-selector: 0.5rem;
-  --radius-field: 0.5rem;
-  --radius-box: 0.5rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
+  /* Neutral: Usando seu Verde Musgo para elementos de UI fortes */
+  --color-neutral: oklch(27% 0.072 132.109);
+  --color-neutral-content: oklch(98% 0.003 247.858);
+
+  /* Estados ajustados para harmonia */
+  --color-info: oklch(65% 0.12 225);
+  --color-success: oklch(70% 0.15 155);
+  --color-warning: oklch(85% 0.1 140);
+  --color-error: oklch(60% 0.18 25);
+
+  /* Ajustes de Elevação e Bordas */
+  --radius-selector: 0.75rem;
+  --radius-field: 0.4rem;
+  --radius-box: 0.6rem;
   --border: 1px;
-  --depth: 1;
-  --noise: 1;
+  --depth: 1.5; /* Dá um pouco mais de sombra aos elementos */
+}
+
+/* TEMA DARK - Grafite Profundo com Destaque Neon */
+@plugin "daisyui/theme" {
+  name: "dark";
+  default: false;
+  prefersdark: true;
+  color-scheme: "dark";
+
+  /* Backgrounds: Cinza Grafite com elevação */
+  --color-base-100: oklch(18% 0.01 150);   /* Fundo principal (mais suave que o preto puro) */
+  --color-base-200: oklch(22% 0.01 150);   /* Cards e Navbars (destaque visual) */
+  --color-base-300: oklch(26% 0.01 150);   /* Inputs e Hover */
+  --color-base-content: oklch(95% 0.01 150); /* Texto quase branco */
+
+  /* Primário: O Verde Vibrante (Brilho intenso no escuro) */
+  --color-primary: oklch(79% 0.209 151.711);
+  --color-primary-content: oklch(15% 0.05 132); 
+
+  /* Secundário: Cyan Dark (Substituindo laranja) */
+  --color-secondary: oklch(50% 0.12 180);
+  --color-secondary-content: oklch(98% 0.01 180);
+
+  /* Neutral: Verde Musgo Profundo */
+  --color-neutral: oklch(27% 0.072 132.109);
+  --color-neutral-content: oklch(95% 0.01 150);
+
+  /* Cores de Estado */
+  --color-info: oklch(65% 0.15 220);
+  --color-success: oklch(79% 0.209 151.711);
+  --color-warning: oklch(82% 0.12 140);
+  --color-error: oklch(60% 0.2 25);
+
+  --radius-selector: 1rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --border: 1px;
+  --depth: 2; /* Aumenta o relevo visual no dark */
 }
 
 /* ===== Global ===== */
