@@ -21,31 +21,12 @@ import {
   Sun,
   Moon,
 } from 'lucide-react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import PricingSection from '../components/PricingSection'
 import { useTheme } from '../contexts/ThemeContext'
 
-/* ───────── Hooks ───────── */
-
-function useScrollReveal() {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add('is-visible')
-        })
-      },
-      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' },
-    )
-
-    const els = ref.current?.querySelectorAll('.reveal')
-    els?.forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
-  }, [])
-
-  return ref
-}
+gsap.registerPlugin(ScrollTrigger)
 
 /* ───────── Data ───────── */
 
@@ -129,8 +110,8 @@ const testimonials = [
 export default function Home() {
   const navigate = useNavigate()
   const { theme, setTheme } = useTheme()
-  const pageRef = useScrollReveal()
   const [navSolid, setNavSolid] = useState(false)
+  const mainRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onScroll = () => setNavSolid(window.scrollY > 20)
@@ -138,8 +119,144 @@ export default function Home() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  /* ── GSAP Animations ── */
+  useEffect(() => {
+    const st = { toggleActions: 'play none none none' }
+
+    const ctx = gsap.context(() => {
+      /* ── Hero: badge desce ── */
+      gsap.fromTo('[data-anim="hero-badge"]',
+        { opacity: 0, y: -30 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' },
+      )
+
+      /* ── Hero: título sobe ── */
+      gsap.fromTo('[data-anim="hero-title"]',
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.9, delay: 0.2, ease: 'power3.out' },
+      )
+
+      /* ── Hero: gradient text ── */
+      gsap.fromTo('[data-anim="hero-gradient"]',
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.9, delay: 0.4, ease: 'power3.out' },
+      )
+
+      /* ── Hero cards ── */
+      gsap.fromTo('[data-anim="hero-card-left"]',
+        { opacity: 0, y: 50 },
+        { opacity: 1, y: 0, duration: 1, delay: 0.5, ease: 'power3.out' },
+      )
+      gsap.fromTo('[data-anim="hero-card-right"]',
+        { opacity: 0, y: 50 },
+        { opacity: 1, y: 0, duration: 1, delay: 0.7, ease: 'power3.out' },
+      )
+
+      /* ── Features header ── */
+      gsap.fromTo('[data-anim="features-header"]',
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
+          scrollTrigger: { trigger: '[data-anim="features-header"]', start: 'top 85%', ...st },
+        },
+      )
+
+      /* ── Features cards: sobem escalonados ── */
+      gsap.fromTo('[data-anim="feature-card"]',
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1, y: 0, stagger: 0.1, duration: 0.6, ease: 'power3.out',
+          scrollTrigger: { trigger: '[data-anim="features-header"]', start: 'top 70%', ...st },
+        },
+      )
+
+      /* ── Steps header ── */
+      gsap.fromTo('[data-anim="steps-header"]',
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
+          scrollTrigger: { trigger: '[data-anim="steps-header"]', start: 'top 85%', ...st },
+        },
+      )
+
+      /* ── Steps items: sobem com bounce ── */
+      gsap.fromTo('[data-anim="step-item"]',
+        { opacity: 0, y: 60 },
+        {
+          opacity: 1, y: 0, stagger: 0.18, duration: 0.8, ease: 'back.out(1.4)',
+          scrollTrigger: { trigger: '[data-anim="steps-container"]', start: 'top 80%', ...st },
+        },
+      )
+
+      /* ── Testimonials header ── */
+      gsap.fromTo('[data-anim="testimonials-header"]',
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
+          scrollTrigger: { trigger: '[data-anim="testimonials-header"]', start: 'top 85%', ...st },
+        },
+      )
+
+      /* ── Testimonials cards: sobem escalonados ── */
+      gsap.fromTo('[data-anim="testimonial-card"]',
+        { opacity: 0, y: 50 },
+        {
+          opacity: 1, y: 0, stagger: 0.15, duration: 0.7, ease: 'power3.out',
+          scrollTrigger: { trigger: '[data-anim="testimonials-container"]', start: 'top 80%', ...st },
+        },
+      )
+
+      /* ── Pricing header ── */
+      gsap.fromTo('[data-anim="pricing-header"]',
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
+          scrollTrigger: { trigger: '[data-anim="pricing-header"]', start: 'top 85%', ...st },
+        },
+      )
+
+      /* ── Pricing content ── */
+      gsap.fromTo('[data-anim="pricing-content"]',
+        { opacity: 0, y: 60 },
+        {
+          opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
+          scrollTrigger: { trigger: '[data-anim="pricing-content"]', start: 'top 85%', ...st },
+        },
+      )
+
+      /* ── CTA content ── */
+      gsap.fromTo('[data-anim="cta-content"]',
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
+          scrollTrigger: { trigger: '[data-anim="cta-content"]', start: 'top 85%', ...st },
+        },
+      )
+
+      /* ── CTA button ── */
+      gsap.fromTo('[data-anim="cta-button"]',
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1, y: 0, duration: 0.7, delay: 0.2, ease: 'power3.out',
+          scrollTrigger: { trigger: '[data-anim="cta-button"]', start: 'top 90%', ...st },
+        },
+      )
+
+      /* ── Footer colunas ── */
+      gsap.fromTo('[data-anim="footer-col"]',
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1, y: 0, stagger: 0.1, duration: 0.6, ease: 'power3.out',
+          scrollTrigger: { trigger: '[data-anim="footer-container"]', start: 'top 90%', ...st },
+        },
+      )
+    }, mainRef)
+
+    return () => ctx.revert()
+  }, [])
+
   return (
-    <div ref={pageRef} className="min-h-screen bg-base-100 overflow-x-hidden">
+    <div ref={mainRef} className="min-h-screen bg-base-100 overflow-x-hidden">
       {/* ── Navbar ─────────────────────────────────────── */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
@@ -209,25 +326,30 @@ export default function Home() {
         />
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-          {/* Top badge + heading */}
-          <div className="text-center mb-12 hero-enter hero-enter-d1">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm mb-6">
+          <div className="text-center mb-12">
+            <div data-anim="hero-badge" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm mb-6">
               <Sparkles size={16} className="text-primary animate-pulse" />
               <span className="text-sm font-semibold text-primary">Gestão completa de veículos</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1]">
+
+            <h1 data-anim="hero-title" className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1]">
               Do carro pessoal à frota,{' '}
               <br className="hidden sm:block" />
-              <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent lp-gradient-text bg-[length:200%_auto]">
+              <span
+                data-anim="hero-gradient"
+                className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent lp-gradient-text bg-[length:200%_auto] inline-block"
+                             >
                 tudo sob controle
               </span>
             </h1>
           </div>
 
-          {/* Two cards */}
-          <div className="hero-enter hero-enter-d2 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-6xl mx-auto">
             {/* Individual card */}
-            <div className="group relative p-8 sm:p-10 rounded-3xl bg-base-100 border border-base-300/50 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 flex flex-col">
+            <div
+              data-anim="hero-card-left"
+              className="group relative p-8 sm:p-10 rounded-3xl bg-base-100 border border-base-300/50 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 flex flex-col"
+                         >
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative flex flex-col flex-1">
                 <div className="flex items-center gap-3 mb-6">
@@ -280,7 +402,10 @@ export default function Home() {
             </div>
 
             {/* Fleet card */}
-            <div className="group relative p-8 sm:p-10 rounded-3xl bg-base-100 border border-base-300/50 hover:border-secondary/40 hover:shadow-2xl hover:shadow-secondary/10 transition-all duration-500 flex flex-col">
+            <div
+              data-anim="hero-card-right"
+              className="group relative p-8 sm:p-10 rounded-3xl bg-base-100 border border-base-300/50 hover:border-secondary/40 hover:shadow-2xl hover:shadow-secondary/10 transition-all duration-500 flex flex-col"
+                         >
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative flex flex-col flex-1">
                 <div className="flex items-center gap-3 mb-6">
@@ -340,7 +465,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-base-200/40 pointer-events-none" />
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-16 reveal">
+          <div data-anim="features-header" className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/20 text-secondary text-xs font-semibold mb-4 uppercase tracking-wider">
               Recursos
             </div>
@@ -354,7 +479,8 @@ export default function Home() {
             {features.map((feat, i) => (
               <div
                 key={i}
-                className={`reveal stagger-${i + 1} group p-6 rounded-2xl bg-base-100 border border-base-300/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 lp-shimmer-overlay`}
+                data-anim="feature-card"
+                className="group p-6 rounded-2xl bg-base-100 border border-base-300/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 lp-shimmer-overlay"
               >
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/10 transition-all duration-300">
@@ -374,7 +500,7 @@ export default function Home() {
       {/* ── How it works ───────────────────────────────── */}
       <section id="como-funciona" className="py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 reveal">
+          <div data-anim="steps-header" className="text-center mb-16" style={{ transformStyle: 'preserve-3d' }}>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-semibold mb-4 uppercase tracking-wider">
               Simples e rápido
             </div>
@@ -384,12 +510,9 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 max-w-5xl mx-auto relative">
-            {/* Connecting line (desktop) */}
-            <div className="hidden md:block absolute top-[52px] left-[16%] right-[16%] h-px bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20" />
-
+          <div data-anim="steps-container" className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 max-w-5xl mx-auto relative">
             {steps.map((step, i) => (
-              <div key={i} className={`reveal stagger-${i + 1} text-center relative`}>
+              <div key={i} data-anim="step-item" className="text-center relative">
                 <div className="relative inline-flex items-center justify-center w-[104px] h-[104px] rounded-3xl bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/15 mb-6 mx-auto group">
                   <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="text-primary relative">{step.icon}</div>
@@ -410,7 +533,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-base-200/40 pointer-events-none" />
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-16 reveal">
+          <div data-anim="testimonials-header" className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold mb-4 uppercase tracking-wider">
               Depoimentos
             </div>
@@ -420,12 +543,13 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div data-anim="testimonials-container" className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {testimonials.map((t, i) => (
               <div
                 key={i}
-                className={`reveal stagger-${i + 1} p-6 rounded-2xl bg-base-100 border border-base-300/50 hover:border-primary/20 hover:shadow-lg transition-all duration-300`}
-              >
+                data-anim="testimonial-card"
+                className="p-6 rounded-2xl bg-base-100 border border-base-300/50 hover:border-primary/20 hover:shadow-lg transition-all duration-300"
+                             >
                 <div className="flex gap-1 mb-4">
                   {Array.from({ length: t.stars }).map((_, s) => (
                     <Star key={s} size={16} className="fill-warning text-warning" />
@@ -450,7 +574,7 @@ export default function Home() {
       {/* ── Pricing ────────────────────────────────────── */}
       <section id="planos" className="py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 reveal">
+          <div data-anim="pricing-header" className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/20 text-secondary text-xs font-semibold mb-4 uppercase tracking-wider">
               Planos
             </div>
@@ -460,28 +584,32 @@ export default function Home() {
             </p>
           </div>
 
-          <PricingSection />
+          <div data-anim="pricing-content">
+            <PricingSection />
+          </div>
         </div>
       </section>
 
       {/* ── CTA ────────────────────────────────────────── */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary" />
-        {/* Decorative orbs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-white/5 blur-3xl lp-float" />
           <div className="absolute -bottom-20 -right-20 w-96 h-96 rounded-full bg-white/5 blur-3xl lp-float-slow" />
         </div>
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <div className="reveal max-w-2xl mx-auto">
-            <h2 className="text-4xl sm:text-5xl font-bold mb-6 text-primary-content">
-              Pronto para organizar seus veículos?
-            </h2>
-            <p className="text-xl mb-10 text-primary-content/80">
-              Junte-se a milhares de motoristas que já economizam tempo e dinheiro
-            </p>
+          <div className="max-w-2xl mx-auto">
+            <div data-anim="cta-content">
+              <h2 className="text-4xl sm:text-5xl font-bold mb-6 text-primary-content">
+                Pronto para organizar seus veículos?
+              </h2>
+              <p className="text-xl mb-10 text-primary-content/80">
+                Junte-se a milhares de motoristas que já economizam tempo e dinheiro
+              </p>
+            </div>
             <button
+              data-anim="cta-button"
               onClick={() => navigate('/login')}
               className="btn btn-lg bg-base-100 text-primary hover:bg-base-200 gap-2 shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
             >
@@ -495,9 +623,8 @@ export default function Home() {
       {/* ── Footer ─────────────────────────────────────── */}
       <footer id="sobre" className="bg-base-200 border-t border-base-300/50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
-            {/* Brand */}
-            <div className="md:col-span-1">
+          <div data-anim="footer-container" className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
+            <div data-anim="footer-col" className="md:col-span-1">
               <span className="text-2xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 CarStory
               </span>
@@ -506,7 +633,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div>
+            <div data-anim="footer-col">
               <h4 className="font-semibold mb-4 text-xs uppercase tracking-widest text-base-content/40">Produto</h4>
               <ul className="space-y-2.5 text-sm text-base-content/60">
                 <li><a href="#recursos" className="hover:text-primary transition-colors">Recursos</a></li>
@@ -515,7 +642,7 @@ export default function Home() {
               </ul>
             </div>
 
-            <div>
+            <div data-anim="footer-col">
               <h4 className="font-semibold mb-4 text-xs uppercase tracking-widest text-base-content/40">Empresa</h4>
               <ul className="space-y-2.5 text-sm text-base-content/60">
                 <li><a href="#sobre" className="hover:text-primary transition-colors">Sobre</a></li>
@@ -524,7 +651,7 @@ export default function Home() {
               </ul>
             </div>
 
-            <div>
+            <div data-anim="footer-col">
               <h4 className="font-semibold mb-4 text-xs uppercase tracking-widest text-base-content/40">Legal</h4>
               <ul className="space-y-2.5 text-sm text-base-content/60">
                 <li><a href="#" className="hover:text-primary transition-colors">Privacidade</a></li>

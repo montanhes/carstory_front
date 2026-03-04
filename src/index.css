@@ -113,6 +113,15 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Hero elements hidden until GSAP animates them */
+[data-anim="hero-badge"],
+[data-anim="hero-title"],
+[data-anim="hero-gradient"],
+[data-anim="hero-card-left"],
+[data-anim="hero-card-right"] {
+  opacity: 0;
+}
+
 /* ===== Landing Page Animations ===== */
 
 @keyframes lp-float {
@@ -141,35 +150,7 @@ html {
   100% { transform: translateX(100%); }
 }
 
-/* Hero entrance */
-.hero-enter {
-  animation: lp-fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-.hero-enter-d1 { animation-delay: 0s; }
-.hero-enter-d2 { animation-delay: 0.1s; }
-.hero-enter-d3 { animation-delay: 0.2s; }
-.hero-enter-d4 { animation-delay: 0.3s; }
-.hero-enter-d5 { animation-delay: 0.45s; }
 
-/* Scroll reveal */
-.reveal {
-  opacity: 0;
-  transform: translateY(36px);
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.stagger-1 { transition-delay: 0.06s; }
-.stagger-2 { transition-delay: 0.12s; }
-.stagger-3 { transition-delay: 0.18s; }
-.stagger-4 { transition-delay: 0.24s; }
-.stagger-5 { transition-delay: 0.30s; }
-.stagger-6 { transition-delay: 0.36s; }
 
 /* Floating blobs */
 .lp-float        { animation: lp-float 6s ease-in-out infinite; }

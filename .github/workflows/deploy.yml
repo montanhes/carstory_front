@@ -1,4 +1,4 @@
-name: Deploy Vite App to Hostoo
+name: Deploy Vite App
 
 on:
   push:
@@ -21,29 +21,45 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build project
-        run: npm run build
-
-      - name: Setup SSH
+      # --- CONFIGURAÇÃO DE SEGURANÇA SSH ---
+      - name: Setup SSH keys
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.HOSTOO_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
+          # Configura chave para Hostoo
+          echo "${{ secrets.HOSTOO_SSH_KEY }}" > ~/.ssh/id_hostoo
+          # Configura chave para Oracle
+          echo "${{ secrets.ORACLE_SSH_KEY }}" > ~/.ssh/id_oracle
+          chmod 600 ~/.ssh/id_hostoo ~/.ssh/id_oracle
+          # Adiciona os servidores aos hosts conhecidos para evitar travamento de confirmação
           ssh-keyscan -H ${{ secrets.HOSTOO_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.ORACLE_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Upload build to temporary folder
+      # --- FLUXO 1: HOSTOO (Oakz) ---
+      - name: Build for Hostoo
+        run: npm run build
+        # Aqui o Vite usa o VITE_API_URL que está no seu .env.production por padrão
+
+      - name: Deploy to Hostoo
         run: |
-          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} \
-          "mkdir -p /home/${{ secrets.HOSTOO_USER }}/frontend_tmp"
-
-          scp -r dist/* \
-          ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:/home/${{ secrets.HOSTOO_USER }}/frontend_tmp/
-
-      - name: Replace frontend safely
-        run: |
-          ssh ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "
+          ssh -i ~/.ssh/id_hostoo ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "mkdir -p /home/${{ secrets.HOSTOO_USER }}/frontend_tmp"
+          scp -i ~/.ssh/id_hostoo -r dist/* ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:/home/${{ secrets.HOSTOO_USER }}/frontend_tmp/
+          ssh -i ~/.ssh/id_hostoo ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "
             cd /home/${{ secrets.HOSTOO_USER }}/public_html && \
             rm -rf index.html assets vite.svg 2>/dev/null || true && \
             mv /home/${{ secrets.HOSTOO_USER }}/frontend_tmp/* . && \
             rm -rf /home/${{ secrets.HOSTOO_USER }}/frontend_tmp
           "
+
+      # --- FLUXO 2: ORACLE CLOUD (Moviu) ---
+      - name: Build for Oracle Cloud
+        run: npm run build
+        env:
+          # Sobrescreve a URL da API especificamente para este build
+          VITE_API_URL: https://api.moviu.com.br
+
+      - name: Deploy to Oracle Cloud
+        run: |
+          # Criar pasta temporária no home do usuário ubuntu
+          ssh -i ~/.ssh/id_oracle ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }} "mkdir -p ~/frontend_tmp"
+          
+          # En
