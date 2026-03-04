@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import '../config/chartConfig'
 import { useAuth } from '../contexts/AuthContext'
 import { FileText, CircleUserRound } from 'lucide-react'
 import { transferService } from '../services/api'

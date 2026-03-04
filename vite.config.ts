@@ -12,7 +12,7 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['icons/*.svg'],
+      includeAssets: ['icons/*.png', 'icons/*.svg', 'icons/*.ico'],
       manifest: {
         name: 'Moviu',
         short_name: 'Moviu',
@@ -25,16 +25,25 @@ export default defineConfig({
         scope: '/',
         icons: [
           {
-            src: 'icons/icon-192.svg',
-            sizes: '192x192',
-            type: 'image/svg+xml',
-            purpose: 'any',
+            src: 'icons/pwa-64x64.png',
+            sizes: '64x64',
+            type: 'image/png',
           },
           {
-            src: 'icons/icon-512.svg',
+            src: 'icons/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
+          {
+            src: 'icons/pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/svg+xml',
-            purpose: 'any maskable',
+            type: 'image/png',
+          },
+          {
+            src: 'icons/maskable-icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
           },
         ],
       },
@@ -84,4 +93,16 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-charts': ['chart.js', 'react-chartjs-2'],
+          'vendor-motion': ['gsap', 'framer-motion'],
+          'vendor-icons': ['lucide-react'],
+        },
+      },
+    },
+  },
 })
