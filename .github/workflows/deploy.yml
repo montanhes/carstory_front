@@ -25,41 +25,53 @@ jobs:
       - name: Setup SSH keys
         run: |
           mkdir -p ~/.ssh
-          # Configura chave para Hostoo
           echo "${{ secrets.HOSTOO_SSH_KEY }}" > ~/.ssh/id_hostoo
-          # Configura chave para Oracle
           echo "${{ secrets.ORACLE_SSH_KEY }}" > ~/.ssh/id_oracle
           chmod 600 ~/.ssh/id_hostoo ~/.ssh/id_oracle
-          # Adiciona os servidores aos hosts conhecidos para evitar travamento de confirmação
           ssh-keyscan -H ${{ secrets.HOSTOO_HOST }} >> ~/.ssh/known_hosts
           ssh-keyscan -H ${{ secrets.ORACLE_HOST }} >> ~/.ssh/known_hosts
 
       # --- FLUXO 1: HOSTOO (Oakz) ---
       - name: Build for Hostoo
         run: npm run build
-        # Aqui o Vite usa o VITE_API_URL que está no seu .env.production por padrão
 
       - name: Deploy to Hostoo
         run: |
-          ssh -i ~/.ssh/id_hostoo ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "mkdir -p /home/${{ secrets.HOSTOO_USER }}/frontend_tmp"
-          scp -i ~/.ssh/id_hostoo -r dist/* ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:/home/${{ secrets.HOSTOO_USER }}/frontend_tmp/
+          ssh -i ~/.ssh/id_hostoo ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "mkdir -p ~/frontend_tmp"
+          scp -i ~/.ssh/id_hostoo -r dist/* ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:~/frontend_tmp/
           ssh -i ~/.ssh/id_hostoo ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "
             cd /home/${{ secrets.HOSTOO_USER }}/public_html && \
             rm -rf index.html assets vite.svg 2>/dev/null || true && \
-            mv /home/${{ secrets.HOSTOO_USER }}/frontend_tmp/* . && \
-            rm -rf /home/${{ secrets.HOSTOO_USER }}/frontend_tmp
+            mv ~/frontend_tmp/* . && \
+            rm -rf ~/frontend_tmp
           "
 
       # --- FLUXO 2: ORACLE CLOUD (Moviu) ---
       - name: Build for Oracle Cloud
         run: npm run build
         env:
-          # Sobrescreve a URL da API especificamente para este build
           VITE_API_URL: https://api.moviu.com.br
 
       - name: Deploy to Oracle Cloud
         run: |
-          # Criar pasta temporária no home do usuário ubuntu
-          ssh -i ~/.ssh/id_oracle ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }} "mkdir -p ~/frontend_tmp"
+          # 1. Garantir que a pasta temporária existe e está limpa
+          ssh -i ~/.ssh/id_oracle ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }} "rm -rf ~/frontend_tmp && mkdir -p ~/frontend_tmp"
           
-          # En
+          # 2. Upload usando o ponto (.) para garantir que o conteúdo de dist vá para dentro de frontend_tmp
+          scp -i ~/.ssh/id_oracle -r dist/. ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }}:~/frontend_tmp/
+          
+          # 3. Mover para a pasta final usando sudo e ajustando permissões
+          ssh -i ~/.ssh/id_oracle ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }} "
+            # Remove o conteúdo antigo
+            sudo rm -rf ${{ secrets.ORACLE_FRONTEND_PATH }}/*
+            
+            # Copia o conteúdo da tmp para o destino (o ponto garante que não crie uma subpasta 'dist')
+            sudo cp -r ~/frontend_tmp/. ${{ secrets.ORACLE_FRONTEND_PATH }}/
+            
+            # Ajusta permissões para o Nginx (www-data)
+            sudo chown -R www-data:www-data ${{ secrets.ORACLE_FRONTEND_PATH }}
+            sudo chmod -R 755 ${{ secrets.ORACLE_FRONTEND_PATH }}
+            
+            # Limpa a temporária
+            rm -rf ~/frontend_tmp
+          "
