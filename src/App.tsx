@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import PWAUpdatePrompt from './components/PWAUpdatePrompt'
+import PWAInstallBanner from './components/PWAInstallBanner'
 
 // Eager — páginas críticas de primeiro acesso
 import Home from './pages/Home'
@@ -56,6 +57,7 @@ function App() {
   return (
     <ThemeProvider>
       <PWAUpdatePrompt />
+      <PWAInstallBanner />
       <BrowserRouter>
         <AuthProvider>
           <Suspense fallback={<PageLoader />}>

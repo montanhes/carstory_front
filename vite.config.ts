@@ -21,8 +21,11 @@ export default defineConfig({
         theme_color: '#4ade80',
         background_color: '#111714',
         display: 'standalone',
+        display_override: ['standalone', 'minimal-ui'],
+        orientation: 'portrait',
         start_url: '/',
         scope: '/',
+        prefer_related_applications: false,
         icons: [
           {
             src: 'icons/pwa-64x64.png',
