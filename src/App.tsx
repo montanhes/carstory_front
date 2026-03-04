@@ -25,6 +25,7 @@ import { FleetBenchmark } from './pages/reports/FleetBenchmark'
 import { AlertsReport } from './pages/reports/AlertsReport'
 import { BudgetReport } from './pages/reports/BudgetReport'
 import './config/chartConfig'
+import PWAUpdatePrompt from './components/PWAUpdatePrompt'
 
 function PlanSelectionRoute({ children }: { children: React.ReactNode }) {
   const { user, hasPlan, loading } = useAuth()
@@ -45,6 +46,7 @@ function PlanSelectionRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <ThemeProvider>
+      <PWAUpdatePrompt />
       <BrowserRouter>
         <AuthProvider>
           <Routes>
