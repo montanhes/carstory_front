@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: symbols/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -37,11 +37,17 @@ jobs:
 
       - name: Deploy to Hostoo
         run: |
+          # 1. Cria pasta temporária para o novo build
           ssh -i ~/.ssh/id_hostoo ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "rm -rf ~/frontend_tmp && mkdir -p ~/frontend_tmp"
+
+          # 2. Upload do conteúdo da pasta dist
           scp -i ~/.ssh/id_hostoo -r dist/. ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }}:~/frontend_tmp/
+
+          # 3. Limpeza seletiva e migração
           ssh -i ~/.ssh/id_hostoo ${{ secrets.HOSTOO_USER }}@${{ secrets.HOSTOO_HOST }} "
             cd /home/${{ secrets.HOSTOO_USER }}/public_html && \
-            find . -maxdepth 1 -mindepth 1 -not -name '.*' -exec rm -rf {} + 2>/dev/null || true && \
+            # O SEGREDO ESTÁ AQUI: -not -name 'carstory_api' impede a deleção do backend
+            find . -maxdepth 1 -mindepth 1 -not -name '.*' -not -name 'carstory_api' -exec rm -rf {} + 2>/dev/null || true && \
             cp -r ~/frontend_tmp/. . && \
             rm -rf ~/frontend_tmp
           "
@@ -62,10 +68,11 @@ jobs:
           
           # 3. Mover para a pasta final usando sudo e ajustando permissões
           ssh -i ~/.ssh/id_oracle ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }} "
-            # Remove o conteúdo antigo
+            # CUIDADO: Se no futuro o backend da Oracle também ficar na mesma pasta, 
+            # você precisará aplicar a mesma lógica do 'find' aqui em vez do 'rm -rf *'
             sudo rm -rf ${{ secrets.ORACLE_FRONTEND_PATH }}/*
             
-            # Copia o conteúdo da tmp para o destino (o ponto garante que não crie uma subpasta 'dist')
+            # Copia o conteúdo da tmp para o destino
             sudo cp -r ~/frontend_tmp/. ${{ secrets.ORACLE_FRONTEND_PATH }}/
             
             # Ajusta permissões para o Nginx (www-data)
