@@ -71,8 +71,42 @@ export function MaintenanceReport() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Gráfico por Tipo */}
-        <ChartCard title="Distribuição por Tipo de Manutenção" height="350px">
-          <Pie data={chartData} options={{ ...defaultChartOptions, maintainAspectRatio: false, scales: {}, plugins: { ...defaultChartOptions.plugins, legend: { display: false } } }} />
+        <ChartCard
+          title="Distribuição por Tipo de Manutenção"
+          height="350px"
+          footer={
+            <div className="flex flex-wrap justify-start gap-2 mt-4">
+              {data.chart_data.labels.map((label: string, i: number) => (
+                <span key={label} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-base-300/50 text-xs text-base-content/80">
+                  <span
+                    className="w-3 h-3 rounded-sm shrink-0"
+                    style={{ backgroundColor: MAINTENANCE_COLORS[i % MAINTENANCE_COLORS.length] }}
+                  />
+                  {label}
+                </span>
+              ))}
+            </div>
+          }
+        >
+          <Pie data={chartData} options={{
+            ...defaultChartOptions,
+            maintainAspectRatio: false,
+            scales: {},
+            plugins: {
+              ...defaultChartOptions.plugins,
+              legend: { display: false },
+              tooltip: {
+                ...defaultChartOptions.plugins.tooltip,
+                callbacks: {
+                  label: function(context: any) {
+                    const label = context.label || '';
+                    const value = context.parsed;
+                    return `${label}: R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                  }
+                }
+              }
+            }
+          }} />
         </ChartCard>
 
         {/* Cards por Veículo */}

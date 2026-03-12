@@ -149,7 +149,7 @@ export function DepreciationReport() {
                   <th className="text-right">Aquisição</th>
                   <th className="text-right">Despesas</th>
                   <th className="text-right">Total Investido</th>
-                  <th className="text-right">Meses</th>
+                  <th className="text-right">Posse</th>
                   <th className="text-right">Custo/Mês</th>
                 </tr>
               </thead>
@@ -166,9 +166,16 @@ export function DepreciationReport() {
                     <td className="text-right font-semibold text-error">
                       R$ {vehicle.total_investment.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
-                    <td className="text-right">{vehicle.months_owned}</td>
+                    <td className="text-right">{(() => {
+                      const totalMonths = Math.round(vehicle.months_owned);
+                      const years = Math.floor(totalMonths / 12);
+                      const months = totalMonths % 12;
+                      if (years === 0) return `${months}m`;
+                      if (months === 0) return `${years}a`;
+                      return `${years}a ${months}m`;
+                    })()}</td>
                     <td className="text-right">
-                      R$ {(vehicle.total_investment / vehicle.months_owned).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      R$ {(vehicle.months_owned > 0 ? vehicle.total_investment / Math.round(vehicle.months_owned) : 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                   </tr>
                 ))}

@@ -59,8 +59,8 @@ export function FleetBenchmark() {
     datasets: [{
       label: 'Média por Veículo',
       data: data.by_category.map(c => c.average_per_vehicle),
-      backgroundColor: 'rgba(99, 102, 241, 0.8)',
-      borderColor: 'rgb(99, 102, 241)',
+      backgroundColor: data.by_category.map((_, i) => `${CATEGORY_COLORS[i % CATEGORY_COLORS.length]}cc`),
+      borderColor: data.by_category.map((_, i) => CATEGORY_COLORS[i % CATEGORY_COLORS.length]),
       borderWidth: 1
     }]
   };
@@ -90,6 +90,21 @@ export function FleetBenchmark() {
           icon={TrendingUp}
           iconColor="text-info"
         />
+      </div>
+
+      {/* Insights */}
+      <div className="alert alert-info">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div className="text-sm">
+          <p className="font-semibold">Insights da Frota:</p>
+          <p>
+            A diferença entre o veículo mais econômico e mais custoso é de{' '}
+            <strong>R$ {(data.most_expensive.total - data.most_economical.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>.
+            Considere revisar a estratégia de manutenção do veículo mais custoso.
+          </p>
+        </div>
       </div>
 
       {/* Veículos Extremos */}
@@ -123,12 +138,91 @@ export function FleetBenchmark() {
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartCard title="Distribuição de Custos da Frota" height="350px">
-          <Doughnut data={distributionChartData} options={{ ...defaultChartOptions, maintainAspectRatio: false, scales: {}, plugins: { ...defaultChartOptions.plugins, legend: { display: false } } }} />
+        <ChartCard
+          title="Distribuição de Custos da Frota"
+          height="350px"
+          footer={
+            <div className="flex flex-wrap justify-start gap-2 mt-4">
+              {data.distribution.labels.map((label: string, i: number) => (
+                <span key={label} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-base-300/50 text-xs text-base-content/80">
+                  <span
+                    className="w-3 h-3 rounded-sm shrink-0"
+                    style={{ backgroundColor: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }}
+                  />
+                  {label}
+                </span>
+              ))}
+            </div>
+          }
+        >
+          <Doughnut data={distributionChartData} options={{
+            ...defaultChartOptions,
+            maintainAspectRatio: false,
+            scales: {},
+            plugins: {
+              ...defaultChartOptions.plugins,
+              legend: { display: false },
+              tooltip: {
+                ...defaultChartOptions.plugins.tooltip,
+                callbacks: {
+                  label: function(context: any) {
+                    const label = context.label || '';
+                    const value = context.parsed;
+                    return `${label}: R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                  }
+                }
+              }
+            }
+          }} />
         </ChartCard>
 
-        <ChartCard title="Média por Veículo por Categoria">
-          <Bar data={categoryChartData} options={{ ...defaultChartOptions, indexAxis: 'y' }} />
+        <ChartCard
+          title="Média por Veículo por Categoria"
+          footer={
+            <div className="flex flex-wrap justify-start gap-2 mt-4">
+              {data.by_category.map((cat, i) => (
+                <span key={cat.category} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-base-300/50 text-xs text-base-content/80">
+                  <span
+                    className="w-3 h-3 rounded-sm shrink-0"
+                    style={{ backgroundColor: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }}
+                  />
+                  {cat.category}
+                </span>
+              ))}
+            </div>
+          }
+        >
+          <Bar data={categoryChartData} options={{
+            ...defaultChartOptions,
+            indexAxis: 'y' as const,
+            scales: {
+              x: {
+                ...defaultChartOptions.scales.x,
+                ticks: {
+                  ...defaultChartOptions.scales.x.ticks,
+                  callback: function(value: any) {
+                    return 'R$ ' + value.toLocaleString('pt-BR');
+                  }
+                }
+              },
+              y: {
+                grid: defaultChartOptions.scales.y.grid,
+                ticks: { color: defaultChartOptions.scales.y.ticks.color }
+              }
+            },
+            plugins: {
+              ...defaultChartOptions.plugins,
+              legend: { display: false },
+              tooltip: {
+                ...defaultChartOptions.plugins.tooltip,
+                callbacks: {
+                  label: function(context: any) {
+                    return `R$ ${context.parsed.x.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                  }
+                }
+              }
+            }
+          }} />
         </ChartCard>
       </div>
 
@@ -167,20 +261,6 @@ export function FleetBenchmark() {
         </div>
       </div>
 
-      {/* Insights */}
-      <div className="alert alert-info">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <div className="text-sm">
-          <p className="font-semibold">Insights da Frota:</p>
-          <p>
-            A diferença entre o veículo mais econômico e mais custoso é de{' '}
-            <strong>R$ {(data.most_expensive.total - data.most_economical.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>.
-            Considere revisar a estratégia de manutenção do veículo mais custoso.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }
