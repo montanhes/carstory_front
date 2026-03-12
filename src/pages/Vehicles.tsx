@@ -4,11 +4,13 @@ import VehicleFormModal from '../components/VehicleFormModal'
 import ConfirmDialog from '../components/ConfirmDialog'
 import AlertDialog from '../components/AlertDialog'
 import { vehicleService, enumService, type Vehicle, type EnumOption } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 
 type AlertType = 'error' | 'success' | 'info' | 'warning'
 
 export default function Vehicles() {
   const navigate = useNavigate()
+  const { plan } = useAuth()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [bodyTypes, setBodyTypes] = useState<EnumOption[]>([])
@@ -72,14 +74,25 @@ export default function Vehicles() {
       const newVehicle = await vehicleService.createVehicle(vehicle)
       setVehicles([...vehicles, newVehicle])
       setIsModalOpen(false)
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro ao criar veículo:', err)
-      setAlertDialog({
-        isOpen: true,
-        type: 'error',
-        title: 'Erro',
-        message: 'Erro ao criar veículo. Tente novamente.',
-      })
+      const status = err?.response?.status
+      const data = err?.response?.data
+      if (status === 403 && data?.current_limit !== undefined) {
+        setAlertDialog({
+          isOpen: true,
+          type: 'warning',
+          title: 'Limite de veículos atingido',
+          message: `Seu plano permite até ${data.current_limit} veículo${data.current_limit !== 1 ? 's' : ''}. Faça upgrade para adicionar mais.`,
+        })
+      } else {
+        setAlertDialog({
+          isOpen: true,
+          type: 'error',
+          title: 'Erro',
+          message: 'Erro ao criar veículo. Tente novamente.',
+        })
+      }
     }
   }
 
@@ -121,16 +134,37 @@ export default function Vehicles() {
     )
   }
 
+  const vehicleLimit = plan?.current_plan?.vehicle_limit ?? null
+  const atLimit = vehicleLimit !== null && vehicles.length >= vehicleLimit
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-base-content">Veículos</h2>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="btn btn-primary btn-sm sm:btn-md w-full sm:w-auto"
-        >
-          <span className="sm:inline">Adicionar Veículo</span>
-        </button>
+        <div>
+          <h2 className="text-2xl md:text-3xl font-bold text-base-content">Veículos</h2>
+          {vehicleLimit !== null && (
+            <p className="text-sm text-base-content/50 mt-0.5">
+              {vehicles.length} de {vehicleLimit} veículo{vehicleLimit !== 1 ? 's' : ''} utilizados
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col items-stretch sm:items-end gap-1 w-full sm:w-auto">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            disabled={atLimit}
+            className="btn btn-primary btn-sm sm:btn-md w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span className="sm:inline">Adicionar Veículo</span>
+          </button>
+          {atLimit && (
+            <p className="text-xs text-warning text-center sm:text-right">
+              Limite atingido.{' '}
+              <a href="/onboarding/plan" className="underline hover:text-warning-content">
+                Faça upgrade
+              </a>
+            </p>
+          )}
+        </div>
       </div>
 
       {vehicles.length === 0 ? (
@@ -210,13 +244,13 @@ export default function Vehicles() {
                   </div>
                   <div className="flex gap-2">
                     <button
-                      className="btn btn-xs flex-1 btn-outline btn-primary"
+                      className="btn btn-sm flex-1 btn-primary"
                       onClick={() => navigate(`/dashboard/vehicles/${vehicle.id}`)}
                     >
                       Detalhes
                     </button>
                     <button
-                      className="btn btn-xs flex-1 btn-outline btn-error"
+                      className="btn btn-sm flex-1 btn-error"
                       onClick={() => handleDeleteVehicle(vehicle.id)}
                     >
                       Excluir

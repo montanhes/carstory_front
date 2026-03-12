@@ -5,6 +5,7 @@ import ExpenseFormModal from '../components/ExpenseFormModal'
 import ExpenseFilters from '../components/ExpenseFilters'
 import ConfirmDialog from '../components/ConfirmDialog'
 import AlertDialog from '../components/AlertDialog'
+import Modal from '../components/Modal'
 import { CreditCard, Gauge, FileText, Paperclip, MessageSquare, Edit2, Trash2, ArrowLeft, Filter, X, ArrowRightLeft } from 'lucide-react'
 
 type AlertType = 'error' | 'success' | 'info' | 'warning'
@@ -625,100 +626,98 @@ export default function VehicleDetails() {
       )}
 
       {/* Modal de Transferência */}
-      {isTransferModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-lg">
-            <h3 className="font-bold text-xl mb-1 flex items-center gap-2">
-              <ArrowRightLeft size={20} />
-              Transferir Veículo
-            </h3>
-            <p className="text-sm text-base-content/60 mb-6">
-              Você está prestes a transferir <strong>{vehicle?.name}</strong>. Esta ação enviará uma solicitação ao destinatário, que precisará aceitar para concluir a transferência.
-            </p>
-
-            {!transferConfirming ? (
-              <>
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Código de Transferência do destinatário</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={personalCodeInput}
-                    onChange={e => handleCodeInput(e.target.value)}
-                    placeholder="Ex: YWT6-WU88-FEZU"
-                    className={`input input-bordered input-lg w-full font-mono tracking-widest text-center ${transferFieldError ? 'input-error' : ''}`}
-                    maxLength={14}
-                    autoFocus
-                    onKeyDown={e => e.key === 'Enter' && handleConfirmTransfer()}
-                  />
-                  {transferFieldError && (
-                    <label className="label">
-                      <span className="label-text-alt text-error whitespace-normal break-words">{transferFieldError}</span>
-                    </label>
-                  )}
-                  <label className="label">
-                    <span className="label-text-alt text-base-content/50 whitespace-normal break-words">O código tem 12 caracteres e pode ser encontrado na tela de Perfil do destinatário.</span>
-                  </label>
-                </div>
-                <div className="modal-action">
-                  <button
-                    onClick={() => setIsTransferModalOpen(false)}
-                    className="btn btn-ghost"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleConfirmTransfer}
-                    className="btn btn-error"
-                    disabled={personalCodeInput.replace(/-/g, '').length < 12}
-                  >
-                    Continuar
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="bg-error/10 border border-error/30 rounded-lg p-4 mb-6">
-                  <p className="text-sm font-semibold text-error mb-3">Confirme os dados antes de enviar:</p>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-base-content/60">Veículo:</span>
-                      <span className="font-semibold">{vehicle?.name}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-base-content/60">Código do destinatário:</span>
-                      <span className="font-mono font-bold tracking-widest">{personalCodeInput}</span>
-                    </div>
+      <Modal
+        isOpen={isTransferModalOpen}
+        onClose={() => { if (!transferLoading) { setIsTransferModalOpen(false); setTransferConfirming(false) } }}
+        title="Transferir Veículo"
+        subtitle={`Você está prestes a transferir ${vehicle?.name}. O destinatário precisará aceitar para concluir.`}
+        size="sm"
+        footer={
+          !transferConfirming ? (
+            <>
+              <button
+                onClick={handleConfirmTransfer}
+                className="btn btn-error btn-sm md:btn-md"
+                disabled={personalCodeInput.replace(/-/g, '').length < 12}
+              >
+                Continuar
+              </button>
+              <button
+                onClick={() => setIsTransferModalOpen(false)}
+                className="btn btn-ghost btn-sm md:btn-md"
+              >
+                Cancelar
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleSendTransfer}
+                className="btn btn-error btn-sm md:btn-md"
+                disabled={transferLoading}
+              >
+                {transferLoading
+                  ? <span className="loading loading-spinner loading-sm" />
+                  : 'Confirmar Transferência'}
+              </button>
+              <button
+                onClick={() => setTransferConfirming(false)}
+                className="btn btn-ghost btn-sm md:btn-md"
+                disabled={transferLoading}
+              >
+                Voltar
+              </button>
+            </>
+          )
+        }
+      >
+        <div className="p-5 md:p-6">
+          {!transferConfirming ? (
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Código de Transferência do destinatário</span>
+              </label>
+              <input
+                type="text"
+                value={personalCodeInput}
+                onChange={e => handleCodeInput(e.target.value)}
+                placeholder="Ex: YWT6-WU88-FEZU"
+                className={`input input-bordered input-lg w-full font-mono tracking-widest text-center ${transferFieldError ? 'input-error' : ''}`}
+                maxLength={14}
+                autoFocus
+                onKeyDown={e => e.key === 'Enter' && handleConfirmTransfer()}
+              />
+              {transferFieldError && (
+                <label className="label">
+                  <span className="label-text-alt text-error whitespace-normal break-words">{transferFieldError}</span>
+                </label>
+              )}
+              <label className="label">
+                <span className="label-text-alt text-base-content/50 whitespace-normal break-words">O código tem 12 caracteres e pode ser encontrado na tela de Perfil do destinatário.</span>
+              </label>
+            </div>
+          ) : (
+            <>
+              <div className="bg-error/10 border border-error/30 rounded-lg p-4 mb-4">
+                <p className="text-sm font-semibold text-error mb-3">Confirme os dados antes de enviar:</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-base-content/60">Veículo:</span>
+                    <span className="font-semibold">{vehicle?.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-base-content/60">Código do destinatário:</span>
+                    <span className="font-mono font-bold tracking-widest">{personalCodeInput}</span>
                   </div>
                 </div>
-                <p className="text-xs text-base-content/50 mb-4">
-                  Ao confirmar, o destinatário receberá a solicitação e poderá aceitar ou recusar. O veículo só será transferido após a aceitação.
-                </p>
-                <div className="modal-action">
-                  <button
-                    onClick={() => setTransferConfirming(false)}
-                    className="btn btn-ghost"
-                    disabled={transferLoading}
-                  >
-                    Voltar
-                  </button>
-                  <button
-                    onClick={handleSendTransfer}
-                    className="btn btn-error"
-                    disabled={transferLoading}
-                  >
-                    {transferLoading
-                      ? <span className="loading loading-spinner loading-sm" />
-                      : 'Confirmar Transferência'}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-          <div className="modal-backdrop" onClick={() => !transferLoading && (setIsTransferModalOpen(false), setTransferConfirming(false))} />
+              </div>
+              <p className="text-xs text-base-content/50">
+                Ao confirmar, o destinatário receberá a solicitação e poderá aceitar ou recusar. O veículo só será transferido após a aceitação.
+              </p>
+            </>
+          )}
         </div>
-      )}
+      </Modal>
 
       <ExpenseFormModal
         isOpen={isModalOpen}

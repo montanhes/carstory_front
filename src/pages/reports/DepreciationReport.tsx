@@ -33,20 +33,19 @@ export function DepreciationReport() {
 
   if (!data) return null;
 
+  const DATASET_COLORS = [
+    'rgb(16, 185, 129)',   // Aquisição - green
+    'rgb(239, 68, 68)',    // Total Investido - red
+  ];
+
   const chartData = {
     labels: data.chart_data.labels,
-    datasets: data.chart_data.datasets.map((dataset, index) => {
-      const colors = [
-        'rgb(16, 185, 129)',   // Aquisição - green
-        'rgb(239, 68, 68)',    // Total Investido - red
-      ];
-      return {
-        ...dataset,
-        backgroundColor: `${colors[index]}cc`,
-        borderColor: colors[index],
-        borderWidth: 1
-      };
-    })
+    datasets: data.chart_data.datasets.map((dataset, index) => ({
+      ...dataset,
+      backgroundColor: `${DATASET_COLORS[index]}cc`,
+      borderColor: DATASET_COLORS[index],
+      borderWidth: 1
+    }))
   };
 
   return (
@@ -54,17 +53,29 @@ export function DepreciationReport() {
       <h1 className="text-2xl md:text-3xl font-bold">Relatório de Depreciação</h1>
 
       {/* Gráfico Comparativo */}
-      <ChartCard title="Investimento Total por Veículo">
+      <ChartCard
+        title="Investimento Total por Veículo"
+        footer={
+          <div className="flex flex-wrap justify-start gap-2 mt-4">
+            {chartData.datasets.map((dataset, i) => (
+              <span key={dataset.label} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-base-300/50 text-xs text-base-content/80">
+                <span
+                  className="w-3 h-3 rounded-sm shrink-0"
+                  style={{ backgroundColor: DATASET_COLORS[i] }}
+                />
+                {dataset.label}
+              </span>
+            ))}
+          </div>
+        }
+      >
         <Bar
           data={chartData}
           options={{
             ...defaultChartOptions,
             plugins: {
               ...defaultChartOptions.plugins,
-              legend: {
-                ...defaultChartOptions.plugins.legend,
-                position: 'bottom' as const
-              }
+              legend: { display: false },
             }
           }}
         />
@@ -105,12 +116,19 @@ export function DepreciationReport() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-base-content/70">Tempo de Posse:</span>
-                  <span>{vehicle.months_owned} meses</span>
+                  <span>{(() => {
+                    const totalMonths = Math.round(vehicle.months_owned);
+                    const years = Math.floor(totalMonths / 12);
+                    const months = totalMonths % 12;
+                    if (years === 0) return `${months} ${months === 1 ? 'mês' : 'meses'}`;
+                    if (months === 0) return `${years} ${years === 1 ? 'ano' : 'anos'}`;
+                    return `${years} ${years === 1 ? 'ano' : 'anos'} e ${months} ${months === 1 ? 'mês' : 'meses'}`;
+                  })()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-base-content/70">Custo Mensal Médio:</span>
                   <span>
-                    R$ {(vehicle.total_investment / vehicle.months_owned).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R$ {(vehicle.months_owned > 0 ? vehicle.total_investment / Math.round(vehicle.months_owned) : 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
               </div>

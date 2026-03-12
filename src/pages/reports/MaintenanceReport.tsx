@@ -72,7 +72,7 @@ export function MaintenanceReport() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Gráfico por Tipo */}
         <ChartCard title="Distribuição por Tipo de Manutenção" height="350px">
-          <Pie data={chartData} options={{ ...defaultChartOptions, maintainAspectRatio: true }} />
+          <Pie data={chartData} options={{ ...defaultChartOptions, maintainAspectRatio: false, scales: {}, plugins: { ...defaultChartOptions.plugins, legend: { display: false } } }} />
         </ChartCard>
 
         {/* Cards por Veículo */}

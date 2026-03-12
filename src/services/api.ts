@@ -86,6 +86,7 @@ export interface PlanTypeOption {
   monthly_price: number
   annual_price: number
   vehicle_limit: number
+  is_free: boolean
 }
 
 export interface BillingCycle {
@@ -99,6 +100,7 @@ export interface UserPlanDetail {
   type: number
   name: string
   vehicle_limit: number
+  vehicles_used: number
 }
 
 export interface UserPlanSubscription {

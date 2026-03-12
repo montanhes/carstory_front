@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import '../config/chartConfig'
 import { useAuth } from '../contexts/AuthContext'
-import { FileText, CircleUserRound } from 'lucide-react'
+import { FileText, LayoutDashboard, Car, Lock } from 'lucide-react'
 import { transferService } from '../services/api'
+import UserAvatar from '../components/UserAvatar'
 
 export default function DashboardLayout() {
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const { user, logout } = useAuth()
+  const { user, logout, plan } = useAuth()
   const [pendingTransferCount, setPendingTransferCount] = useState(0)
 
   useEffect(() => {
@@ -23,44 +24,47 @@ export default function DashboardLayout() {
   }
 
   const navItems = [
-    { to: '/dashboard', label: 'Início', end: true },
-    { to: 'vehicles', label: 'Veículos', end: false },
+    { to: '/dashboard', label: 'Dashboard', end: true, icon: LayoutDashboard },
+    { to: 'vehicles', label: 'Veículos', end: false, icon: Car },
   ]
+
+  const availableReports = plan?.available_reports ?? []
 
   const reportSections = {
     essentials: [
-      { to: 'reports/by-category', label: 'Por Categoria' },
-      { to: 'reports/by-vehicle', label: 'Por Veículo' },
-      { to: 'reports/extract', label: 'Extrato Detalhado' },
+      { to: 'reports/by-category', label: 'Por Categoria', reportKey: 'expenses/by-category' },
+      { to: 'reports/by-vehicle', label: 'Por Veículo', reportKey: 'expenses/by-vehicle' },
+      { to: 'reports/extract', label: 'Extrato Detalhado', reportKey: 'expenses/extract' },
     ],
     analysis: [
-      { to: 'reports/temporal-analysis', label: 'Análise Temporal' },
-      { to: 'reports/fuel-analysis', label: 'Análise de Combustível' },
-      { to: 'reports/vehicle-comparison', label: 'Comparação de Veículos' },
-      { to: 'reports/maintenance', label: 'Manutenção' },
+      { to: 'reports/temporal-analysis', label: 'Análise Temporal', reportKey: 'temporal-analysis', minPlan: 'Premium' },
+      { to: 'reports/fuel-analysis', label: 'Análise de Combustível', reportKey: 'fuel-analysis', minPlan: 'Premium' },
+      { to: 'reports/vehicle-comparison', label: 'Comparação de Veículos', reportKey: 'vehicle-comparison', minPlan: 'Família' },
+      { to: 'reports/maintenance', label: 'Manutenção', reportKey: 'maintenance', minPlan: 'Premium' },
     ],
     advanced: [
-      { to: 'reports/depreciation', label: 'Depreciação' },
-      { to: 'reports/fleet-benchmark', label: 'Benchmark de Frota' },
-      { to: 'reports/alerts', label: 'Alertas e Lembretes' },
-      { to: 'reports/budget', label: 'Orçamento' },
+      { to: 'reports/depreciation', label: 'Depreciação', reportKey: 'depreciation', minPlan: 'Família' },
+      { to: 'reports/fleet-benchmark', label: 'Benchmark de Frota', reportKey: 'fleet-benchmark', minPlan: 'Business' },
+      { to: 'reports/alerts', label: 'Alertas e Lembretes', reportKey: 'alerts', minPlan: 'Premium' },
+      { to: 'reports/budget', label: 'Orçamento', reportKey: 'budget', minPlan: 'Família' },
     ],
   }
 
-  const NavLink_ = ({ to, label, end }: any) => (
+  const NavLink_ = ({ to, label, end, icon: Icon }: any) => (
     <li>
       <NavLink
         to={to}
         end={end}
         onClick={() => setDrawerOpen(false)}
         className={({ isActive }) =>
-          `block px-4 py-2.5 rounded-lg transition-all duration-200 ${
+          `flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${
             isActive
               ? 'bg-primary text-primary-content font-medium'
               : 'text-base-content/70 hover:bg-base-300 hover:text-base-content'
           }`
         }
       >
+        {Icon && <Icon size={18} />}
         {label}
       </NavLink>
     </li>
@@ -93,15 +97,7 @@ export default function DashboardLayout() {
         {/* User menu — extremo direito */}
         <div className="ml-auto dropdown dropdown-end">
           <div tabIndex={0} role="button" className="btn btn-ghost btn-circle relative">
-            {user?.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.name}
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            ) : (
-              <CircleUserRound size={28} className="text-base-content/70" />
-            )}
+            <UserAvatar name={user?.name ?? ''} avatar={user?.avatar} />
             {pendingTransferCount > 0 && (
               <span className="badge badge-error badge-xs absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-[1.1rem] p-0 flex items-center justify-center text-[10px]">
                 {pendingTransferCount}
@@ -212,23 +208,40 @@ export default function DashboardLayout() {
                       <span className="flex-1 border-t border-base-content/15"></span>
                     </div>
                     <ul className="space-y-1">
-                      {reportSections.analysis.map((item) => (
-                        <li key={item.to}>
-                          <NavLink
-                            to={item.to}
-                            onClick={() => setDrawerOpen(false)}
-                            className={({ isActive }) =>
-                              `block px-4 py-2 rounded-lg text-sm transition-all duration-200 ${
-                                isActive
-                                  ? 'bg-primary text-primary-content font-medium'
-                                  : 'text-base-content/70 hover:bg-base-300 hover:text-base-content'
-                              }`
-                            }
-                          >
-                            {item.label}
-                          </NavLink>
-                        </li>
-                      ))}
+                      {reportSections.analysis.map((item) => {
+                        const locked = !availableReports.includes(item.reportKey)
+                        if (locked) {
+                          return (
+                            <li key={item.to}>
+                              <NavLink
+                                to="/onboarding/plan"
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-base-content/30 hover:bg-base-300/50 transition-all duration-200"
+                              >
+                                <span className="flex-1">{item.label}</span>
+                                <span className="text-[10px] font-semibold text-base-content/30">{item.minPlan}</span>
+                                <Lock size={11} className="shrink-0" />
+                              </NavLink>
+                            </li>
+                          )
+                        }
+                        return (
+                          <li key={item.to}>
+                            <NavLink
+                              to={item.to}
+                              onClick={() => setDrawerOpen(false)}
+                              className={({ isActive }) =>
+                                `block px-4 py-2 rounded-lg text-sm transition-all duration-200 ${
+                                  isActive
+                                    ? 'bg-primary text-primary-content font-medium'
+                                    : 'text-base-content/70 hover:bg-base-300 hover:text-base-content'
+                                }`
+                              }
+                            >
+                              {item.label}
+                            </NavLink>
+                          </li>
+                        )
+                      })}
                     </ul>
                   </li>
 
@@ -239,23 +252,40 @@ export default function DashboardLayout() {
                       <span className="flex-1 border-t border-base-content/15"></span>
                     </div>
                     <ul className="space-y-1">
-                      {reportSections.advanced.map((item) => (
-                        <li key={item.to}>
-                          <NavLink
-                            to={item.to}
-                            onClick={() => setDrawerOpen(false)}
-                            className={({ isActive }) =>
-                              `block px-4 py-2 rounded-lg text-sm transition-all duration-200 ${
-                                isActive
-                                  ? 'bg-primary text-primary-content font-medium'
-                                  : 'text-base-content/70 hover:bg-base-300 hover:text-base-content'
-                              }`
-                            }
-                          >
-                            {item.label}
-                          </NavLink>
-                        </li>
-                      ))}
+                      {reportSections.advanced.map((item) => {
+                        const locked = !availableReports.includes(item.reportKey)
+                        if (locked) {
+                          return (
+                            <li key={item.to}>
+                              <NavLink
+                                to="/onboarding/plan"
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-base-content/30 hover:bg-base-300/50 transition-all duration-200"
+                              >
+                                <span className="flex-1">{item.label}</span>
+                                <span className="text-[10px] font-semibold text-base-content/30">{item.minPlan}</span>
+                                <Lock size={11} className="shrink-0" />
+                              </NavLink>
+                            </li>
+                          )
+                        }
+                        return (
+                          <li key={item.to}>
+                            <NavLink
+                              to={item.to}
+                              onClick={() => setDrawerOpen(false)}
+                              className={({ isActive }) =>
+                                `block px-4 py-2 rounded-lg text-sm transition-all duration-200 ${
+                                  isActive
+                                    ? 'bg-primary text-primary-content font-medium'
+                                    : 'text-base-content/70 hover:bg-base-300 hover:text-base-content'
+                                }`
+                              }
+                            >
+                              {item.label}
+                            </NavLink>
+                          </li>
+                        )
+                      })}
                     </ul>
                   </li>
                 </ul>

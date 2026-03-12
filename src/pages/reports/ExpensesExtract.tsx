@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { reportService, vehicleService, type ExpensesExtract, type Vehicle } from '../../services/api';
+import DateInput from '../../components/DateInput';
 
 export function ExpensesExtract() {
   const [data, setData] = useState<ExpensesExtract | null>(null);
@@ -68,22 +69,20 @@ export function ExpensesExtract() {
               <label className="label">
                 <span className="label-text text-xs">Data Inicial</span>
               </label>
-              <input
-                type="date"
-                className="input input-bordered input-sm"
+              <DateInput
                 value={filters.start_date}
-                onChange={(e) => handleFilterChange('start_date', e.target.value)}
+                onChange={(isoDate) => handleFilterChange('start_date', isoDate)}
+                className="input input-bordered input-sm w-full"
               />
             </div>
             <div className="form-control">
               <label className="label">
                 <span className="label-text text-xs">Data Final</span>
               </label>
-              <input
-                type="date"
-                className="input input-bordered input-sm"
+              <DateInput
                 value={filters.end_date}
-                onChange={(e) => handleFilterChange('end_date', e.target.value)}
+                onChange={(isoDate) => handleFilterChange('end_date', isoDate)}
+                className="input input-bordered input-sm w-full"
               />
             </div>
             <div className="form-control">

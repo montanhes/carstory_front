@@ -5,9 +5,10 @@ interface ChartCardProps {
   children: ReactNode;
   height?: string;
   actions?: ReactNode;
+  footer?: ReactNode;
 }
 
-export function ChartCard({ title, children, height = '400px', actions }: ChartCardProps) {
+export function ChartCard({ title, children, height = '400px', actions, footer }: ChartCardProps) {
   return (
     <div className="card bg-base-200 shadow-md border border-base-300">
       <div className="card-body p-4 md:p-6">
@@ -18,6 +19,7 @@ export function ChartCard({ title, children, height = '400px', actions }: ChartC
         <div style={{ height, position: 'relative' }}>
           {children}
         </div>
+        {footer}
       </div>
     </div>
   );

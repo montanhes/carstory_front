@@ -28,10 +28,10 @@ interface Plan {
 
 const plans: Plan[] = [
   {
-    name: 'Básico',
+    name: 'Gratuito',
     subtitle: 'O "Primeiro Passo"',
-    monthlyPrice: 9.9,
-    yearlyPrice: +(9.9 * 10 / 12).toFixed(2),
+    monthlyPrice: 0,
+    yearlyPrice: 0,
     description: 'Para quem quer começar a organizar',
     vehicles: '1 veículo',
     features: [
@@ -39,12 +39,12 @@ const plans: Plan[] = [
       { text: 'Histórico de abastecimento', included: true },
       { text: 'Cálculo de consumo médio', included: true },
       { text: 'Lembretes básicos por e-mail', included: true },
+      { text: 'Com anúncios', included: true },
       { text: 'Upload de Notas Fiscais', included: false },
       { text: 'Exportação PDF', included: false },
-      { text: 'Gráficos de gastos', included: false },
       { text: 'Previsão de manutenção IA', included: false },
     ],
-    cta: 'Assinar Básico',
+    cta: 'Começar Grátis',
     highlight: false,
     badge: null,
   },

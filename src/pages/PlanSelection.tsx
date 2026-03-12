@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle2, Zap, ArrowRight, CreditCard } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { planService, paymentService, type PlanTypeOption } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -10,6 +11,7 @@ const PLAN_FEATURES: Record<number, string[]> = {
     'Histórico de abastecimento',
     'Cálculo de consumo médio',
     'Lembretes básicos por e-mail',
+    'Com anúncios',
   ],
   2: [
     'Até 3 veículos',
@@ -45,7 +47,8 @@ const PLAN_HIGHLIGHT: Record<number, boolean> = {
 }
 
 export default function PlanSelection() {
-  const { user } = useAuth()
+  const { user, checkAuth } = useAuth()
+  const navigate = useNavigate()
   const [plans, setPlans] = useState<PlanTypeOption[]>([])
   const [fetchLoading, setFetchLoading] = useState(true)
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null)
@@ -64,11 +67,19 @@ export default function PlanSelection() {
       .finally(() => setFetchLoading(false))
   }, [])
 
+  const selectedPlanIsFree = plans.find((p) => p.value === selectedPlan)?.is_free ?? false
+
   const handleConfirm = async () => {
     if (!selectedPlan) return
     setSubmitting(true)
     setSubmitError('')
     try {
+      if (selectedPlanIsFree) {
+        await planService.assignPlan(selectedPlan)
+        await checkAuth()
+        navigate('/dashboard')
+        return
+      }
       const billingCycle = isYearly ? 'yearly' : 'monthly'
       const returnUrl = window.location.origin + '/onboarding/plan'
       const completionUrl = window.location.origin + '/dashboard/payment/success'
@@ -147,6 +158,7 @@ export default function PlanSelection() {
         {/* Cards de plano */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {plans.map((plan) => {
+            const isFree = plan.is_free
             const monthlyPrice = plan.monthly_price
             const annualTotal = plan.annual_price
             const annualMonthly = annualTotal / 12
@@ -193,13 +205,19 @@ export default function PlanSelection() {
                   <h3 className="text-xl font-bold mb-1">{plan.label}</h3>
 
                   <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-3xl font-black">
-                      {price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </span>
-                    <span className="text-sm text-base-content/50">/mês</span>
+                    {isFree ? (
+                      <span className="text-3xl font-black">Grátis</span>
+                    ) : (
+                      <>
+                        <span className="text-3xl font-black">
+                          {price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </span>
+                        <span className="text-sm text-base-content/50">/mês</span>
+                      </>
+                    )}
                   </div>
 
-                  {isYearly && (
+                  {!isFree && isYearly && (
                     <div className="flex items-center gap-2 mb-4">
                       <span className="badge badge-primary badge-sm font-bold">2 meses grátis</span>
                       <span className="text-xs text-base-content/50 line-through">
@@ -208,7 +226,7 @@ export default function PlanSelection() {
                     </div>
                   )}
 
-                  <div className={`flex items-center gap-1.5 mb-4 text-sm font-semibold text-primary ${isYearly ? '' : 'mt-4'}`}>
+                  <div className={`flex items-center gap-1.5 mb-4 text-sm font-semibold text-primary ${!isFree && isYearly ? '' : 'mt-4'}`}>
                     <Zap size={14} />
                     <span>{vehicleLabel}</span>
                   </div>
@@ -248,19 +266,25 @@ export default function PlanSelection() {
             ) : (
               <>
                 {selectedPlanData
-                  ? `Assinar ${selectedPlanData.label}`
+                  ? selectedPlanIsFree
+                    ? 'Começar Grátis'
+                    : `Assinar ${selectedPlanData.label}`
                   : 'Selecione um plano'}
                 {!submitting && selectedPlan && <ArrowRight size={18} />}
               </>
             )}
           </button>
           <p className="text-xs text-base-content/40 mt-3">
-            Cancele quando quiser · Sem compromisso
+            {selectedPlanIsFree
+              ? 'Sem cartão de crédito necessário'
+              : 'Cancele quando quiser · Sem compromisso'}
           </p>
-          <div className="flex items-center justify-center gap-2 mt-2 text-xs text-base-content/40">
-            <CreditCard size={14} />
-            <span>PIX e Cartão de Crédito</span>
-          </div>
+          {!selectedPlanIsFree && (
+            <div className="flex items-center justify-center gap-2 mt-2 text-xs text-base-content/40">
+              <CreditCard size={14} />
+              <span>PIX e Cartão de Crédito</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

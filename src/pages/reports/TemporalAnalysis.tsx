@@ -87,7 +87,13 @@ export function TemporalAnalysis() {
 
       {/* Gráfico de Evolução */}
       <ChartCard title="Evolução Temporal de Despesas">
-        <Line data={chartData} options={defaultChartOptions} />
+        <Line data={chartData} options={{
+          ...defaultChartOptions,
+          plugins: {
+            ...defaultChartOptions.plugins,
+            legend: { display: false },
+          }
+        }} />
       </ChartCard>
 
       {/* Tabela de Dados */}

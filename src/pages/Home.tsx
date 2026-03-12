@@ -24,7 +24,9 @@ import {
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import PricingSection from '../components/PricingSection'
+import UserAvatar from '../components/UserAvatar'
 import { useTheme } from '../contexts/ThemeContext'
+import { useAuth } from '../contexts/AuthContext'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -110,6 +112,7 @@ const testimonials = [
 export default function Home() {
   const navigate = useNavigate()
   const { theme, setTheme } = useTheme()
+  const { user } = useAuth()
   const [navSolid, setNavSolid] = useState(false)
   const mainRef = useRef<HTMLDivElement>(null)
 
@@ -293,18 +296,33 @@ export default function Home() {
                 <Sun size={18} className="swap-off" />
                 <Moon size={18} className="swap-on" />
               </label>
-              <button
-                onClick={() => navigate('/login')}
-                className="text-sm font-medium text-base-content/70 hover:text-primary transition-colors px-4 py-2"
-              >
-                Entrar
-              </button>
-              <button
-                onClick={() => navigate('/login')}
-                className="btn btn-primary btn-sm gap-2 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all"
-              >
-                Começar agora
-              </button>
+              {user ? (
+                <>
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="btn btn-primary btn-sm gap-2 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all"
+                  >
+                    Dashboard
+                    <ArrowRight size={16} />
+                  </button>
+                  <UserAvatar name={user.name} avatar={user.avatar} />
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="text-sm font-medium text-base-content/70 hover:text-primary transition-colors px-4 py-2"
+                  >
+                    Entrar
+                  </button>
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="btn btn-primary btn-sm gap-2 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all"
+                  >
+                    Começar agora
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

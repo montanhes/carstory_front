@@ -60,21 +60,20 @@ export function VehicleComparison() {
 
   if (!data) return null;
 
+  const DATASET_COLORS = [
+    'rgb(99, 102, 241)',   // Total - indigo
+    'rgb(245, 158, 11)',   // Combustível - amber
+    'rgb(239, 68, 68)',    // Manutenção - red
+  ];
+
   const chartData = {
     labels: data.comparison_chart.labels,
-    datasets: data.comparison_chart.datasets.map((dataset, index) => {
-      const colors = [
-        'rgb(99, 102, 241)',   // Total - indigo
-        'rgb(245, 158, 11)',   // Combustível - amber
-        'rgb(239, 68, 68)',    // Manutenção - red
-      ];
-      return {
-        ...dataset,
-        backgroundColor: `${colors[index]}cc`,
-        borderColor: colors[index],
-        borderWidth: 1
-      };
-    })
+    datasets: data.comparison_chart.datasets.map((dataset, index) => ({
+      ...dataset,
+      backgroundColor: `${DATASET_COLORS[index]}cc`,
+      borderColor: DATASET_COLORS[index],
+      borderWidth: 1
+    }))
   };
 
   return (
@@ -116,17 +115,29 @@ export function VehicleComparison() {
       </div>
 
       {/* Gráfico Comparativo */}
-      <ChartCard title="Comparação de Gastos por Categoria">
+      <ChartCard
+        title="Comparação de Gastos por Categoria"
+        footer={
+          <div className="flex flex-wrap justify-start gap-2 mt-4">
+            {chartData.datasets.map((dataset, i) => (
+              <span key={dataset.label} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-base-300/50 text-xs text-base-content/80">
+                <span
+                  className="w-3 h-3 rounded-sm shrink-0"
+                  style={{ backgroundColor: DATASET_COLORS[i] }}
+                />
+                {dataset.label}
+              </span>
+            ))}
+          </div>
+        }
+      >
         <Bar
           data={chartData}
           options={{
             ...defaultChartOptions,
             plugins: {
               ...defaultChartOptions.plugins,
-              legend: {
-                ...defaultChartOptions.plugins.legend,
-                position: 'bottom' as const
-              }
+              legend: { display: false },
             }
           }}
         />

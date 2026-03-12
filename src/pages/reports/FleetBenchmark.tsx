@@ -124,7 +124,7 @@ export function FleetBenchmark() {
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartCard title="Distribuição de Custos da Frota" height="350px">
-          <Doughnut data={distributionChartData} options={{ ...defaultChartOptions, maintainAspectRatio: true }} />
+          <Doughnut data={distributionChartData} options={{ ...defaultChartOptions, maintainAspectRatio: false, scales: {}, plugins: { ...defaultChartOptions.plugins, legend: { display: false } } }} />
         </ChartCard>
 
         <ChartCard title="Média por Veículo por Categoria">

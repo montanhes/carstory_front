@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import type { VehicleExpense, EnumOption, ExpenseCategoryWithTypes } from '../services/api'
 import { handleCurrencyChange } from '../utils/currency'
 import DateInput from './DateInput'
+import Modal from './Modal'
 
 interface ExpenseFormData {
   expense_category: number | ''
@@ -126,218 +127,209 @@ export default function ExpenseFormModal({
     setFormData((prev) => ({
       ...prev,
       expense_category: categoryId,
-      expense_type: '', // Reseta o tipo quando muda a categoria
+      expense_type: '',
     }))
   }
 
-  // Busca os tipos da categoria selecionada
   const selectedCategory = expenseCategoriesWithTypes.find(
     (cat) => cat.id === formData.expense_category
   )
   const availableTypes = selectedCategory ? selectedCategory.types : []
 
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black bg-opacity-70"
-        onClick={onClose}
-      ></div>
-      <div className="relative bg-base-200 rounded-lg shadow-xl w-full max-w-2xl max-h-[95vh] overflow-y-auto border border-base-300">
-        <div className="sticky top-0 bg-base-200 px-4 py-3 md:px-6 md:py-4 border-b border-base-300 rounded-t-lg">
-          <h3 className="text-lg md:text-xl font-bold text-base-content">
-            {expense ? 'Editar Despesa' : 'Adicionar Despesa'}
-          </h3>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-4 md:p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-            {/* Categoria */}
-            <div className="form-control">
-              <label className="label py-1">
-                <span className="label-text text-xs md:text-sm">Categoria *</span>
-              </label>
-              <select
-                name="expense_category"
-                value={formData.expense_category}
-                onChange={handleCategoryChange}
-                className="select select-bordered select-sm md:select-md w-full"
-                required
-              >
-                <option value="">Selecione</option>
-                {expenseCategoriesWithTypes.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Tipo */}
-            <div className="form-control">
-              <label className="label py-1">
-                <span className="label-text text-xs md:text-sm">Tipo *</span>
-              </label>
-              <select
-                name="expense_type"
-                value={formData.expense_type}
-                onChange={handleChange}
-                className="select select-bordered select-sm md:select-md w-full"
-                required
-              >
-                <option value="">
-                  {formData.expense_category ? 'Selecione' : 'Primeiro selecione uma categoria'}
-                </option>
-                {availableTypes.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Valor */}
-            <div className="form-control">
-              <label className="label py-1">
-                <span className="label-text text-xs md:text-sm">Valor *</span>
-              </label>
-              <input
-                type="text"
-                name="value"
-                value={displayData.value}
-                onChange={handleValueChange}
-                placeholder="0,00"
-                className="input input-bordered input-sm md:input-md w-full"
-                required
-              />
-            </div>
-
-            {/* Método de Pagamento */}
-            <div className="form-control">
-              <label className="label py-1">
-                <span className="label-text text-xs md:text-sm">Método de Pagamento *</span>
-              </label>
-              <select
-                name="payment_method"
-                value={formData.payment_method}
-                onChange={handleChange}
-                className="select select-bordered select-sm md:select-md w-full"
-                required
-              >
-                <option value="">Selecione</option>
-                {paymentMethods.map((method) => (
-                  <option key={method.value} value={method.value}>
-                    {method.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Data */}
-            <div className="form-control">
-              <label className="label py-1">
-                <span className="label-text text-xs md:text-sm">Data da Despesa *</span>
-              </label>
-              <DateInput
-                value={formData.expense_date}
-                onChange={(isoDate) => setFormData((prev) => ({ ...prev, expense_date: isoDate }))}
-                placeholder="DD/MM/AAAA"
-                required
-                className="input input-bordered input-sm md:input-md w-full"
-              />
-            </div>
-
-            {/* Quilometragem */}
-            <div className="form-control">
-              <label className="label py-1">
-                <span className="label-text text-xs md:text-sm">Quilometragem</span>
-              </label>
-              <input
-                type="number"
-                name="odometer_mileage"
-                value={formData.odometer_mileage}
-                onChange={handleChange}
-                min="0"
-                placeholder="Ex: 50000"
-                className="input input-bordered input-sm md:input-md w-full"
-              />
-            </div>
-
-            {/* Número da Nota */}
-            <div className="form-control sm:col-span-2">
-              <label className="label py-1">
-                <span className="label-text text-xs md:text-sm">Número da Nota Fiscal</span>
-              </label>
-              <input
-                type="text"
-                name="invoice_number"
-                value={formData.invoice_number}
-                onChange={(e) => setFormData((prev) => ({ ...prev, invoice_number: e.target.value }))}
-                placeholder="Ex: NF-12345"
-                maxLength={50}
-                className="input input-bordered input-sm md:input-md w-full"
-              />
-            </div>
-
-            {/* Checkboxes */}
-            <div className="form-control">
-              <label className="label cursor-pointer justify-start gap-2 py-1">
-                <input
-                  type="checkbox"
-                  name="is_recurring"
-                  checked={formData.is_recurring}
-                  onChange={handleChange}
-                  className="checkbox checkbox-xs md:checkbox-sm"
-                />
-                <span className="label-text text-xs md:text-sm">Despesa recorrente</span>
-              </label>
-            </div>
-
-            <div className="form-control">
-              <label className="label cursor-pointer justify-start gap-2 py-1">
-                <input
-                  type="checkbox"
-                  name="receipt_attached"
-                  checked={formData.receipt_attached}
-                  onChange={handleChange}
-                  className="checkbox checkbox-xs md:checkbox-sm"
-                />
-                <span className="label-text text-xs md:text-sm">Recibo anexado</span>
-              </label>
-            </div>
-
-            {/* Observações */}
-            <div className="form-control sm:col-span-2">
-              <label className="label py-1">
-                <span className="label-text text-xs md:text-sm">Observações</span>
-              </label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
-                placeholder="Observações adicionais"
-                rows={3}
-                maxLength={1000}
-                className="textarea textarea-bordered textarea-sm md:textarea-md w-full"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6 pt-4 border-t border-base-300">
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn btn-ghost btn-sm md:btn-md"
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={expense ? 'Editar Despesa' : 'Adicionar Despesa'}
+      size="md"
+      footer={
+        <>
+          <button type="submit" form="expense-form" className="btn btn-primary btn-sm md:btn-md">
+            Salvar
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn btn-ghost btn-sm md:btn-md"
+          >
+            Cancelar
+          </button>
+        </>
+      }
+    >
+      <form id="expense-form" onSubmit={handleSubmit} className="p-5 md:p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+          {/* Categoria */}
+          <div className="form-control">
+            <label className="label py-1">
+              <span className="label-text text-xs md:text-sm">Categoria *</span>
+            </label>
+            <select
+              name="expense_category"
+              value={formData.expense_category}
+              onChange={handleCategoryChange}
+              className="select select-bordered select-sm md:select-md w-full"
+              required
             >
-              Cancelar
-            </button>
-            <button type="submit" className="btn btn-primary btn-sm md:btn-md">
-              Salvar
-            </button>
+              <option value="">Selecione</option>
+              {expenseCategoriesWithTypes.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
           </div>
-        </form>
-      </div>
-    </div>
+
+          {/* Tipo */}
+          <div className="form-control">
+            <label className="label py-1">
+              <span className="label-text text-xs md:text-sm">Tipo *</span>
+            </label>
+            <select
+              name="expense_type"
+              value={formData.expense_type}
+              onChange={handleChange}
+              className="select select-bordered select-sm md:select-md w-full"
+              required
+            >
+              <option value="">
+                {formData.expense_category ? 'Selecione' : 'Primeiro selecione uma categoria'}
+              </option>
+              {availableTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Valor */}
+          <div className="form-control">
+            <label className="label py-1">
+              <span className="label-text text-xs md:text-sm">Valor *</span>
+            </label>
+            <input
+              type="text"
+              name="value"
+              value={displayData.value}
+              onChange={handleValueChange}
+              placeholder="0,00"
+              className="input input-bordered input-sm md:input-md w-full"
+              required
+            />
+          </div>
+
+          {/* Método de Pagamento */}
+          <div className="form-control">
+            <label className="label py-1">
+              <span className="label-text text-xs md:text-sm">Método de Pagamento *</span>
+            </label>
+            <select
+              name="payment_method"
+              value={formData.payment_method}
+              onChange={handleChange}
+              className="select select-bordered select-sm md:select-md w-full"
+              required
+            >
+              <option value="">Selecione</option>
+              {paymentMethods.map((method) => (
+                <option key={method.value} value={method.value}>
+                  {method.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Data */}
+          <div className="form-control">
+            <label className="label py-1">
+              <span className="label-text text-xs md:text-sm">Data da Despesa *</span>
+            </label>
+            <DateInput
+              value={formData.expense_date}
+              onChange={(isoDate) => setFormData((prev) => ({ ...prev, expense_date: isoDate }))}
+              placeholder="DD/MM/AAAA"
+              required
+              className="input input-bordered input-sm md:input-md w-full"
+            />
+          </div>
+
+          {/* Quilometragem */}
+          <div className="form-control">
+            <label className="label py-1">
+              <span className="label-text text-xs md:text-sm">Quilometragem</span>
+            </label>
+            <input
+              type="number"
+              name="odometer_mileage"
+              value={formData.odometer_mileage}
+              onChange={handleChange}
+              min="0"
+              placeholder="Ex: 50000"
+              className="input input-bordered input-sm md:input-md w-full"
+            />
+          </div>
+
+          {/* Número da Nota */}
+          <div className="form-control sm:col-span-2">
+            <label className="label py-1">
+              <span className="label-text text-xs md:text-sm">Número da Nota Fiscal</span>
+            </label>
+            <input
+              type="text"
+              name="invoice_number"
+              value={formData.invoice_number}
+              onChange={(e) => setFormData((prev) => ({ ...prev, invoice_number: e.target.value }))}
+              placeholder="Ex: NF-12345"
+              maxLength={50}
+              className="input input-bordered input-sm md:input-md w-full"
+            />
+          </div>
+
+          {/* Checkboxes */}
+          <div className="form-control">
+            <label className="label cursor-pointer justify-start gap-2 py-1">
+              <input
+                type="checkbox"
+                name="is_recurring"
+                checked={formData.is_recurring}
+                onChange={handleChange}
+                className="checkbox checkbox-xs md:checkbox-sm"
+              />
+              <span className="label-text text-xs md:text-sm">Despesa recorrente</span>
+            </label>
+          </div>
+
+          <div className="form-control">
+            <label className="label cursor-pointer justify-start gap-2 py-1">
+              <input
+                type="checkbox"
+                name="receipt_attached"
+                checked={formData.receipt_attached}
+                onChange={handleChange}
+                className="checkbox checkbox-xs md:checkbox-sm"
+              />
+              <span className="label-text text-xs md:text-sm">Recibo anexado</span>
+            </label>
+          </div>
+
+          {/* Observações */}
+          <div className="form-control sm:col-span-2">
+            <label className="label py-1">
+              <span className="label-text text-xs md:text-sm">Observações</span>
+            </label>
+            <textarea
+              name="notes"
+              value={formData.notes}
+              onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
+              placeholder="Observações adicionais"
+              rows={3}
+              maxLength={1000}
+              className="textarea textarea-bordered textarea-sm md:textarea-md w-full"
+            />
+          </div>
+        </div>
+      </form>
+    </Modal>
   )
 }
